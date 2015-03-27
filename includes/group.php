@@ -170,24 +170,21 @@ function bpeo_filter_query_for_bp_group( $query ) {
 add_action( 'pre_get_posts', 'bpeo_filter_query_for_bp_group' );
 
 /**
- * Catch "fullcalendar" AJAX requests and process 'bp_group' information.
+ * Modify the calendar query to include the current group ID.
  *
- * @param array $query Query vars as set up by EO.
+ * @param  array $query Query vars as set up by EO.
+ * @return array
  */
-function bpeo_add_bp_group_id_to_ajax_query( $query ) {
-	if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
+function bpeo_filter_calendar_query_for_bp_group( $query ) {
+	if ( ! bp_is_group() ) {
 		return $query;
 	}
 
-	if ( ! isset( $_REQUEST['bp_group_id'] ) ) {
-		return $query;
-	}
-
-	$query['bp_group'] = intval( $_REQUEST['bp_group_id'] );
+	$query['bp_group'] = bp_get_current_group_id();
 
 	return $query;
 }
-add_filter( 'eventorganiser_fullcalendar_query', 'bpeo_add_bp_group_id_to_ajax_query' );
+add_filter( 'eventorganiser_fullcalendar_query', 'bpeo_filter_calendar_query_for_bp_group' );
 
 /**
  * Add group information to calendar event markup.
