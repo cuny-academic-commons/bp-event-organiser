@@ -76,24 +76,21 @@ function bpeo_filter_query_for_bp_displayed_user_id( $query ) {
 add_action( 'pre_get_posts', 'bpeo_filter_query_for_bp_displayed_user_id', 1000 );
 
 /**
- * Catch "fullcalendar" AJAX requests and process 'bp_displayed_user_id' information.
+ * Modify the calendar query to include the displayed user ID.
  *
- * @param array $query Query vars as set up by EO.
+ * @param  array $query Query vars as set up by EO.
+ * @return array
  */
-function bpeo_add_bp_displayed_user_id_to_ajax_query( $query ) {
-	if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
+function bpeo_filter_calendar_query_for_bp_user( $query ) {
+	if ( ! bp_is_user() ) {
 		return $query;
 	}
 
-	if ( ! isset( $_REQUEST['bp_displayed_user_id'] ) ) {
-		return $query;
-	}
-
-	$query['bp_displayed_user_id'] = intval( $_REQUEST['bp_displayed_user_id'] );
+	$query['bp_displayed_user_id'] = bp_displayed_user_id();
 
 	return $query;
 }
-add_filter( 'eventorganiser_fullcalendar_query', 'bpeo_add_bp_displayed_user_id_to_ajax_query' );
+add_filter( 'eventorganiser_fullcalendar_query', 'bpeo_filter_calendar_query_for_bp_user' );
 
 /**
  * Add author information to calendar event markup.
