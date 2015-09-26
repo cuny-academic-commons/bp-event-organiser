@@ -2,7 +2,10 @@
 
 /**
  * @group activity
+ *
+ * Temporarily disabled.
  */
+if ( 0 == 1 ) :
 class BPEO_Tests_Activity_EventDelete extends BPEO_UnitTestCase {
 	public function test_delete_event_not_connected_to_group() {
 		$u = $this->factory->user->create();
@@ -78,3 +81,4 @@ class BPEO_Tests_Activity_EventDelete extends BPEO_UnitTestCase {
 		bpeo_connect_event_to_group( $e, $this->groups[2] );
 	}
 }
+endif;
