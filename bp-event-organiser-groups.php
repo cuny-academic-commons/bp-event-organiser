@@ -89,6 +89,15 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'slug' => $slug,
 				'nav_item_position' => $pos,
 				'enable_create_step' => false,
+				'screens' => array(
+					'edit' => array(
+						'enabled' => true,
+						'slug' => 'events',
+						'name' => __( 'Events', 'bp-event-organiser' ),
+						'screen_callback' => array( $this, 'edit_screen_callback' ),
+						'screen_save_callback' => array( $this, 'edit_screen_save_callback' ),
+					),
+				),
 			);
 
 			// init
@@ -153,11 +162,13 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'link'     => bpeo_get_group_permalink() . 'upcoming/',
 		), $default_params );
 
-		$sub_nav[] = array_merge( array(
-			'name'     => __( 'New Event', 'bp-event-organiser' ),
-			'slug'     => bpeo_get_events_new_slug(),
-			'position' => 99,
-		), $default_params );
+		if ( current_user_can( 'connect_event_to_group', bp_get_current_group_id() ) ) {
+			$sub_nav[] = array_merge( array(
+				'name'     => __( 'New Event', 'bp-event-organiser' ),
+				'slug'     => bpeo_get_events_new_slug(),
+				'position' => 99,
+			), $default_params );
+		}
 
 		foreach( (array) $sub_nav as $nav ) {
 			bp_core_new_subnav_item( $nav );
@@ -174,9 +185,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		// new event
 		if ( bpeo_is_action( 'new' ) ) {
 			// check if user has access
-			// @todo currently all group members have access to edit events... restrict to mods?
-			if ( false === is_user_logged_in() || false === buddypress()->groups->current_group->is_user_member ) {
-				bp_core_add_message( __( 'You do not have access to edit this event.', 'bp-event-organiser' ), 'error' );
+			if ( ! current_user_can( 'connect_event_to_group', bp_get_current_group_id() ) ) {
+				bp_core_add_message( __( 'You do not have access to create events within this group.', 'bp-event-organiser' ), 'error' );
 				bp_core_redirect( bpeo_get_group_permalink() );
 				die();
 			}
@@ -484,6 +494,36 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 */
 	public function no_post_status_title( $retval, $post ) {
 		return $post->post_title;
+	}
+
+	/**
+	 * Renders the content of the Manage subscreen.
+	 *
+	 * @param int $group_id ID of the group.
+	 */
+	public function edit_screen_callback( $group_id = null ) {
+		$setting = bpeo_get_group_minimum_member_role_for_connection( $group_id );
+
+		?>
+		<h3><?php esc_html_e( 'Events Settings', 'bp-event-organiser' ) ?></h3>
+		<label for="bpeo-group-member-role-member"><input type="radio" <?php checked( 'member', $setting ) ?> value="member" name="bpeo-group-member-role" id="bpeo-group-member-role-member" /> <?php esc_html_e( 'Any group member may connect events to this group', 'bp-event-organiser' ) ?></label>
+		<label for="bpeo-group-member-role-admin_mod"><input type="radio" <?php checked( 'admin_mod', $setting ) ?> value="admin_mod" name="bpeo-group-member-role" id="bpeo-group-member-role-admin_mod" /> <?php esc_html_e( 'Only administrators and moderators may connect events to this group', 'bp-event-organiser' ) ?></label>
+		<br />
+		<?php
+	}
+
+	/**
+	 * Processes the saved Manage subscreen.
+	 *
+	 * @param int $group_id ID of the group.
+	 */
+	public function edit_screen_save_callback( $group_id = null ) {
+		$new_setting = isset( $_POST['bpeo-group-member-role'] ) && in_array( $_POST['bpeo-group-member-role'], array( 'member', 'admin_mod' ) ) ? $_POST['bpeo-group-member-role'] : null;
+
+		if ( $new_setting ) {
+			groups_update_groupmeta( $group_id, 'bpeo_connect_member_role', $new_setting );
+			bp_core_add_message( __( 'Settings saved!', 'bpeo-event-organiser' ) );
+		}
 	}
 
 } // class ends

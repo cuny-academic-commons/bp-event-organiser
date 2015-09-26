@@ -285,7 +285,7 @@ function bpeo_group_event_meta_cap( $caps, $cap, $user_id, $args ) {
 	}
 
 	// Some caps do not expect a specific event to be passed to the filter.
-	$primitive_caps = array( 'read_events', 'read_private_events', 'edit_events', 'edit_others_events', 'publish_events', 'delete_events', 'delete_others_events', 'manage_event_categories' );
+	$primitive_caps = array( 'read_events', 'read_private_events', 'edit_events', 'edit_others_events', 'publish_events', 'delete_events', 'delete_others_events', 'manage_event_categories', 'connect_event_to_group' );
 	if ( ! in_array( $cap, $primitive_caps ) ) {
 		$event = get_post( $args[0] );
 		if ( 'event' !== $event->post_type ) {
@@ -317,6 +317,22 @@ function bpeo_group_event_meta_cap( $caps, $cap, $user_id, $args ) {
 
 		// @todo group admins / mods permissions
 		case 'edit_event' :
+			break;
+
+		case 'connect_event_to_group' :
+			$group_id = $args[0];
+			$setting = bpeo_get_group_minimum_member_role_for_connection( $group_id );
+
+			if ( 'admin_mod' === $setting ) {
+				$can_connect = groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
+			} else {
+				$can_connect = groups_is_user_member( $user_id, $group_id );
+			}
+
+			if ( $can_connect ) {
+				$caps = array( 'read' );
+			}
+
 			break;
 	}
 
@@ -704,3 +720,19 @@ function bpeo_ges_add_ical_link( $content, $activity ) {
 	return $content . $ical_link;
 }
 add_filter( 'bp_ass_activity_notification_content', 'bpeo_ges_add_ical_link', 20, 2 );
+
+/**
+ * Get the "minimum member role" connection setting for a group.
+ *
+ * @param int $group_id Group ID.
+ * @return string 'member' or 'admin_mod'.
+ */
+function bpeo_get_group_minimum_member_role_for_connection( $group_id ) {
+	// Only allowed values are 'member' or 'admin_mod'. Default to 'member'.
+	$setting = groups_get_groupmeta( $group_id, 'bpeo_connect_member_role', true );
+	if ( 'admin_mod' !== $setting ) {
+		$setting = 'member';
+	}
+
+	return $setting;
+}

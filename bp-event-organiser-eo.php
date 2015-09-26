@@ -275,6 +275,9 @@ class BuddyPress_Event_Organiser_EO {
 		<select name="bp_group_organizer_groups[]" multiple="multiple" style="width:100%;">
 			<?php
 				foreach( $this->group_ids as $gid ) {
+					if ( ! current_user_can( 'connect_event_to_group', $gid ) ) {
+						continue;
+					}
 					$group = groups_get_group( array( 'group_id' => $gid ) );
 					$private = 'public' !== $group->status ? 'title="Private"' : '';
 					echo "<option value='{$gid}' selected='selected' {$private}>{$group->name}</option>";
@@ -310,6 +313,10 @@ class BuddyPress_Event_Organiser_EO {
 		$groups_template->group = new stdClass;
 
 		foreach ( $groups['groups'] as $group ) {
+			if ( ! current_user_can( 'connect_event_to_group', $group->id ) ) {
+				continue;
+			}
+
 			$groups_template->group = $group;
 			$json[] = array(
 				'id'          => $group->id,
@@ -347,7 +354,15 @@ class BuddyPress_Event_Organiser_EO {
 			$group_ids = array_map( 'intval', $_POST['bp_group_organizer_groups'] );
 		}
 
-		$this->set_event_groups( $event_id, $group_ids );
+		// Exclude groups that the current user doesn't have permission to connect.
+		$_group_ids = array();
+		foreach ( $group_ids as $gid ) {
+			if ( current_user_can( 'connect_event_to_group', $gid ) ) {
+				$_group_ids[] = $gid;
+			}
+		}
+
+		$this->set_event_groups( $event_id, $_group_ids );
 	}
 
 	/**
