@@ -18,8 +18,10 @@ class BPEO_Tests_User_BpeoEventMetaCap extends BPEO_UnitTestCase {
 	}
 
 	public function test_non_loggedin_user_can_read_public_event() {
+		$u = $this->factory->user->create();
 		$e = $this->event_factory->event->create( array(
 			'post_status' => 'publish',
+			'post_author' => $u,
 		) );
 
 		$this->set_current_user( 0 );
@@ -27,8 +29,10 @@ class BPEO_Tests_User_BpeoEventMetaCap extends BPEO_UnitTestCase {
 	}
 
 	public function test_non_loggedin_user_cannot_read_private_event() {
+		$u = $this->factory->user->create();
 		$e = $this->event_factory->event->create( array(
 			'post_status' => 'private',
+			'post_author' => $u,
 		) );
 
 		$this->set_current_user( 0 );
