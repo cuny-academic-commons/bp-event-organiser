@@ -455,7 +455,9 @@ function bpeo_activity_action_format_for_groups( $action, $activity ) {
 		}
 	}
 
-	$event_url = trailingslashit( $event_url );
+	if ( get_option( 'permalink_structure' ) ) {
+		$event_url = trailingslashit( $event_url );
+	}
 
 	$event_name = $event->post_title;
 
