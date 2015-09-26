@@ -312,7 +312,6 @@ function bpeo_remove_duplicates_from_activity_stream( $activity, $r, $iterator =
 			unset( $_bpeo_recursing_activity );
 			remove_filter( 'bp_activity_set_' . $r['scope'] . '_scope_args', 'bpeo_override_activity_scope_args', 20, 2 );
 
-
 			/*
 			 * If the number of backfill items returned is less than the number requested, it means there
 			 * are no more activity items to query after this. Set a flag so that we override the count
