@@ -227,10 +227,11 @@ class BPEO_Tests_Activity_EventCreate extends BPEO_UnitTestCase {
 
 		$event = get_post( $e );
 
+		$event_url = bpeo_get_group_permalink( $g2 ) . $event->post_name;
 		$ua_expected = sprintf(
 			'%s created the event %s in the group %s.',
 			sprintf( '<a href="%s">%s</a>', esc_url( bp_core_get_user_domain( $u ) ), esc_html( bp_core_get_user_displayname( $u ) ) ),
-			sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $event ) ), esc_html( $event->post_title ) ),
+			sprintf( '<a href="%s">%s</a>', esc_url( $event_url ), esc_html( $event->post_title ) ),
 			sprintf( '<a href="%s">%s</a>', esc_url( bp_get_group_permalink( $g2 ) . 'events/' ), esc_html( $g2->name ) )
 		);
 		$this->assertSame( $ua_expected, $ua->action );
@@ -238,7 +239,7 @@ class BPEO_Tests_Activity_EventCreate extends BPEO_UnitTestCase {
 		$g2_expected = sprintf(
 			'%s created the event %s in the group %s.',
 			sprintf( '<a href="%s">%s</a>', esc_url( bp_core_get_user_domain( $u ) ), esc_html( bp_core_get_user_displayname( $u ) ) ),
-			sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $event ) ), esc_html( $event->post_title ) ),
+			sprintf( '<a href="%s">%s</a>', esc_url( $event_url ), esc_html( $event->post_title ) ),
 			sprintf( '<a href="%s">%s</a>', esc_url( bp_get_group_permalink( $g2 ) . 'events/' ), esc_html( $g2->name ) )
 		);
 		$this->assertSame( $g2_expected, $ga2->action );
