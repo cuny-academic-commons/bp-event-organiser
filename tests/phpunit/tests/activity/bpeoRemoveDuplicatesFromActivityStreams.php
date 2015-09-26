@@ -131,6 +131,9 @@ class BPEO_Tests_Activity_BpeoRemoveDuplicatesFromActivityStream extends BPEO_Un
 		$found = $GLOBALS['activities_template'];
 		unset( $GLOBALS['activities_template'] );
 
+		// Don't ask.
+		unset( $GLOBALS['_bpeo_recursing_activity'] );
+
 		foreach ( $found->activities as $f ) {
 			$this->assertSame( 'events', $f->component );
 		}
@@ -150,6 +153,9 @@ class BPEO_Tests_Activity_BpeoRemoveDuplicatesFromActivityStream extends BPEO_Un
 		$found = $GLOBALS['activities_template'];
 		unset( $GLOBALS['activities_template'] );
 
+		// Don't ask.
+		unset( $GLOBALS['_bpeo_recursing_activity'] );
+
 		$expected = array( self::$events[0], self::$events[2] );
 		$this->assertEquals( $expected, wp_list_pluck( $found->activities, 'secondary_item_id' ) );
 	}
@@ -168,6 +174,9 @@ class BPEO_Tests_Activity_BpeoRemoveDuplicatesFromActivityStream extends BPEO_Un
 		$found = $GLOBALS['activities_template'];
 		unset( $GLOBALS['activities_template'] );
 
+		// Don't ask.
+		unset( $GLOBALS['_bpeo_recursing_activity'] );
+
 		$this->assertSame( 3, count( $found->activities ) );
 		$this->assertEquals( self::$events, wp_list_pluck( $found->activities, 'secondary_item_id' ) );
 	}
@@ -181,6 +190,9 @@ class BPEO_Tests_Activity_BpeoRemoveDuplicatesFromActivityStream extends BPEO_Un
 
 		$found = $GLOBALS['activities_template'];
 		unset( $GLOBALS['activities_template'] );
+
+		// Don't ask.
+		unset( $GLOBALS['_bpeo_recursing_activity'] );
 
 		$this->assertSame( 13, count( $found->activities ) );
 
