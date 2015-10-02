@@ -400,11 +400,19 @@ function bpeo_canonical_event_content( $content ) {
  *     add_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
  *
  * @param  array $retval Current template stack.
- * @return array
+ * @return array|string
  */
-function bpeo_register_template_stack( $retval ) {
+function bpeo_register_template_stack( $retval = array() ) {
+	$dir = constant( 'BPEO_PATH' ) . 'templates/';
+
 	// inject our stack between the current theme and EO's template directory
-	array_splice( $retval, 2, 0, constant( 'BPEO_PATH' ) . 'templates/' );
+	if ( ! empty( $retval ) ) {
+		array_splice( $retval, 2, 0, $dir );
+
+	// for BuddyPress
+	} else {
+		$retval = $dir;
+	}
 	return $retval;
 }
 

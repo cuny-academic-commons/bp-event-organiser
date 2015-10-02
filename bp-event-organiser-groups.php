@@ -180,7 +180,9 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 */
 	public function _display_hook() {
 		// add event subnav
-		add_action( 'bp_template_content', array( $this, 'add_subnav' ) );
+		if ( empty( $_GET['embed'] ) ) {
+			add_action( 'bp_template_content', array( $this, 'add_subnav' ) );
+		}
 
 		// new event
 		if ( bpeo_is_action( 'new' ) ) {

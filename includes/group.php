@@ -598,6 +598,89 @@ function bpeo_list_connected_groups() {
 }
 add_action( 'eventorganiser_additional_event_meta', 'bpeo_list_connected_groups' );
 
+/** Embed ********************************************************************/
+
+/**
+ * Use a different template when embedding group events.
+ *
+ * This is done so we can remove the header and footer so embedding can be
+ * done via an IFRAME.
+ *
+ * - example.com/groups/GROUP/events/?embed=true - Will show group calendar
+ * - example.com/groups/GROUP/events/upcoming/?embed=true - Will show a list
+ *   of upcoming events
+ *
+ * @param  array $retval Current templates.
+ * @return array
+ */
+function bpeo_group_events_embed_template( $retval = array() ) {
+	if ( false === bp_is_current_action( 'events' ) ) {
+		return $retval;
+	}
+
+	if ( empty( $_GET['embed'] ) ) {
+		return $retval;
+	}
+
+	// Main event calendar page
+	if ( false === bp_action_variables() ) {
+		$embed = true;
+
+	// Upcoming
+	} elseif ( bp_is_action_variable( 'upcoming' ) ) {
+		$embed = true;
+	}
+
+	if ( false === $embed ) {
+		return $retval;
+	}
+
+	// Temporary marker
+	buddypress()->bpeo_events_embed = true;
+
+	// Register our template stack
+	bp_register_template_stack( 'bpeo_register_template_stack', 13 );
+
+	// Remove the admin bar while we're at it
+	add_filter( 'show_admin_bar', '__return_false' );
+	remove_action( 'wp_head', '_admin_bar_bump_cb' );
+
+	// Remove emoji
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
+	// Remove all assets
+	add_action( 'wp_enqueue_scripts', 'bpeo_group_events_embed_remove_all_assets', 999 );
+
+	// Remove all footer hooks
+	remove_all_actions( 'wp_footer' );
+
+	// And add back required EO footer hooks
+	add_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
+	add_action( 'wp_footer', array( 'EventOrganiser_Shortcodes', 'print_script' ) );
+
+	// Use our special template when embedding group events
+	return array( 'groups/single/index-action-events-embed.php' );
+}
+add_filter( 'bp_template_hierarchy_groups_single_item', 'bpeo_group_events_embed_template' );
+
+/**
+ * Remove all styles and scripts when embedding a group calendar.
+ *
+ * This is so we can remove any unnecessary network requests.
+ */
+function bpeo_group_events_embed_remove_all_assets() {
+	if ( empty( buddypress()->bpeo_events_embed ) ) {
+		return;
+	}
+
+	$styles = wp_styles();
+	$styles->queue = array();
+
+	$scripts = wp_scripts();
+	$scripts->queue = array();
+}
+
 /** iCal *********************************************************************/
 
 /**
