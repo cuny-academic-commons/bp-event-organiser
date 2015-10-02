@@ -601,25 +601,29 @@ add_action( 'eventorganiser_additional_event_meta', 'bpeo_list_connected_groups'
 /** Embed ********************************************************************/
 
 /**
- * Use a different template when embedding group events.
+ * Should we load our override template for embedding group events?
  *
- * This is done so we can remove the header and footer so embedding can be
- * done via an IFRAME.
- *
+ * We only override if we're on a group events page and if '?embed=true' is
+ * to the URL:
  * - example.com/groups/GROUP/events/?embed=true - Will show group calendar
  * - example.com/groups/GROUP/events/upcoming/?embed=true - Will show a list
  *   of upcoming events
  *
- * @param  array $retval Current templates.
- * @return array
+ * This is done so we can remove the header and footer so embedding can be
+ * done via an IFRAME.
+ *
+ * If true, we'll also remove a bunch of unnecessary content to avoid resource
+ * bloat.
+ *
+ * @return bool
  */
-function bpeo_group_events_embed_template( $retval = array() ) {
+function bpeo_groups_event_embed_override_template() {
 	if ( false === bp_is_current_action( 'events' ) ) {
-		return $retval;
+		return false;
 	}
 
 	if ( empty( $_GET['embed'] ) ) {
-		return $retval;
+		return false;
 	}
 
 	// Main event calendar page
@@ -632,7 +636,7 @@ function bpeo_group_events_embed_template( $retval = array() ) {
 	}
 
 	if ( false === $embed ) {
-		return $retval;
+		return false;
 	}
 
 	// Temporary marker
@@ -659,10 +663,49 @@ function bpeo_group_events_embed_template( $retval = array() ) {
 	add_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 	add_action( 'wp_footer', array( 'EventOrganiser_Shortcodes', 'print_script' ) );
 
+	return true;
+}
+
+/**
+ * Use a different template when embedding group events.
+ *
+ * This is for BP theme compatibility.
+ *
+ * @param  array $retval Current templates.
+ * @return array
+ */
+function bpeo_group_events_embed_template_hierarchy( $retval = array() ) {
+	if ( false === bpeo_groups_event_embed_override_template() ) {
+		return $retval;
+	}
+
 	// Use our special template when embedding group events
 	return array( 'groups/single/index-action-events-embed.php' );
 }
-add_filter( 'bp_template_hierarchy_groups_single_item', 'bpeo_group_events_embed_template' );
+add_filter( 'bp_template_hierarchy_groups_single_item', 'bpeo_group_events_embed_template_hierarchy' );
+
+/**
+ * Use a different template when embedding group events for bp-default themes.
+ *
+ * Basically the same as {@link bpeo_group_events_embed_template_hierarchy()},
+ * but for bp-default.  Yay for backward compatibility!
+ *
+ * @param  string $retval Template
+ * @return string
+ */
+function bpeo_group_events_embed_template_for_bpdefault( $retval = '' ) {
+	if ( true === bp_detect_theme_compat_with_current_theme() ) {
+		return $retval;
+	}
+
+	if ( false === bpeo_groups_event_embed_override_template() ) {
+		return $retval;
+	}
+
+	// For bp-default, we do not allow overriding in child themes. Meh!
+	return bpeo_register_template_stack() . 'buddypress/groups/single/index-action-events-embed.php';
+}
+add_filter( 'bp_located_template', 'bpeo_group_events_embed_template_for_bpdefault', 0 );
 
 /**
  * Remove all styles and scripts when embedding a group calendar.
