@@ -141,6 +141,12 @@ class BPEO_Component extends BP_Component {
 			return;
 		}
 
+		// omit iCal feeds
+		if ( bp_is_current_action( 'ical' ) || true === ctype_xdigit( bp_current_action() ) ) {
+			$this->ical_action();
+			return;
+		}
+
 		// This is not a single event.
 		if ( ! bp_current_action() ) {
 			return;
@@ -436,9 +442,21 @@ class BPEO_Component extends BP_Component {
 	}
 
 	/**
-	 * Manage events screen handler.
+	 * "Manage Events" screen handler.
 	 */
 	protected function manage_events_screen() {
+		// 'Reset Private URL' action
+		if ( ! empty( $_GET['bpeo-reset'] ) ) {
+			check_admin_referer( 'bpeo_user_reset_private_ical', 'bpeo-reset' );
+
+			// reset hash
+			bpeo_get_the_user_private_ical_hash( bp_displayed_user_id(), true );
+
+			bp_core_add_message( __( 'Private iCalendar URL has been reset. Please copy the new link below to use in your calendar application.', 'bp-event-organiser' ) );
+			bp_core_redirect( trailingslashit( bp_displayed_user_domain() . bpeo_get_events_slug() . '/manage' ) );
+			die();
+		}
+
 		$this->events = new WP_Query( array(
 			'author' => bp_displayed_user_id(),
 			'post_type' => 'event',
@@ -453,14 +471,14 @@ class BPEO_Component extends BP_Component {
 	}
 
 	/**
-	 * Displays events that the user can manage.
+	 * "Manage Events" screen content.
 	 */
 	public function display_manage_events() {
 		// inline CSS for now during dev period
 	?>
 		<style type="text/css">
-		#manage-events .post-status {width:80px;}
-		#manage-events .event-date {width:160px;}
+		#manage-events .post-status {width:5.5em;}
+		#manage-events .event-date {width:11.5em;}
 		#manage-events .post-date {width:94px; padding-right:0;}
 
 		#manage-events td {vertical-align:top; padding-top:15px;}
@@ -475,6 +493,8 @@ class BPEO_Component extends BP_Component {
 		</style>
 
 	<?php
+		// 'Manage Events' content
+		// @todo Move this to a template part.
 		echo '<div id="manage-events">';
 
 		if ( $this->events->have_posts() ) :
@@ -529,8 +549,42 @@ class BPEO_Component extends BP_Component {
 		endif;
 
 		echo '</div>';
+
+		// 'Manage iCalendar Settings' template part
+		add_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+		eo_get_template_part( 'buddypress/events/manage-user-ical' );
 	}
 
+	/**
+	 * Validate iCalendar download.
+	 */
+	protected function ical_action() {
+		$args = array(
+			'filename' => bp_get_displayed_user_username(),
+		);
+
+		// public iCal
+		if ( bp_is_current_action( 'ical' ) ) {
+			$args['name']   = bp_get_displayed_user_fullname();
+			$args['author'] = bp_displayed_user_id();
+
+		// private iCal
+		} else {
+			if ( false === bp_is_current_action( bpeo_get_the_user_private_ical_hash() ) ) {
+				return;
+			}
+
+			if ( false === bp_is_action_variable( 'ical' ) ) {
+				return;
+			}
+
+			$args['name'] = sprintf( __( '%s (Private)', 'bp-event-organiser' ), bp_get_displayed_user_fullname() );
+			$args['bp_displayed_user_id'] = bp_displayed_user_id();
+		}
+
+		// iCal time!
+		bpeo_do_ical_download( $args );
+	}
 }
 
 buddypress()->bpeo = new BPEO_Component();

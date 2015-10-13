@@ -87,6 +87,65 @@ function bpeo_get_my_calendar_event_ids( $user_id, $args = array() ) {
 }
 
 /**
+ * Get the private iCalendar hash for a user.
+ *
+ * If hash doesn't exist, we generate it and save it for the user. You can
+ * generate a new hash by setting $reset to true.
+ *
+ * @param  int  $user_id The user ID
+ * @param  bool $reset   Resets the private hash for the user. Default: false.
+ * @return string|bool
+ */
+function bpeo_get_the_user_private_ical_hash( $user_id = 0, $reset = false ) {
+	if ( empty( $user_id ) ) {
+		$user_id = bp_displayed_user_id();
+	}
+
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	if ( false === $reset ) {
+		$hash = bp_get_user_meta( $user_id, 'bpeo_private_ical_hash', true );
+	} else {
+		$hash = '';
+	}
+
+	if ( empty( $hash ) ) {
+		$hash = md5( uniqid( '' ) );
+		bp_update_user_meta( $user_id, 'bpeo_private_ical_hash', $hash );
+	}
+
+	return $hash;
+}
+
+/**
+ * Output the private iCalendar URL for a user.
+ *
+ * @param int $user_id The user ID
+ */
+function bpeo_the_user_private_ical_url( $user_id = 0 ) {
+	echo bpeo_get_the_user_private_ical_url( $user_id = 0 );
+}
+	/**
+	 * Get the private iCalendar URL for a user.
+	 *
+	 * @param  int $user_id The user ID
+	 * @return string|bool
+	 */
+	function bpeo_get_the_user_private_ical_url( $user_id = 0 ) {
+		if ( empty( $user_id ) ) {
+			$user_id = bp_displayed_user_id();
+		}
+
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		return trailingslashit( esc_url( bp_core_get_user_domain( $user_id ) . bpeo_get_events_slug() . '/' . bpeo_get_the_user_private_ical_hash( $user_id ) . '/ical' ) );
+	}
+
+/**
  * Add EO capabilities for subscribers and contributors.
  *
  * By default, subscribers and contributors do not have caps to post, edit or

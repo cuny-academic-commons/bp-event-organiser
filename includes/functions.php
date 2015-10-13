@@ -167,6 +167,66 @@ function bpeo_the_filter_title() {
 	}
 
 /**
+ * Helper function to process and generate an iCal download.
+ *
+ * Must be used before get_header().
+ *
+ * @param array $r {
+ *     Arguments for setting up the iCal download.  See {@link eo_get_events()}
+ *     for full list of arguments, as well as {@link WP_Query}.
+ *
+ *     @type string $name     Name of the iCalendar. This shows up in the iCalendar file header.
+ *     @type string $filename Filename for the iCal download.
+ * }
+ */
+function bpeo_do_ical_download( $r = array() ) {
+	$r = wp_parse_args( $r, array(
+		'name' => '',
+
+		// Emulate Google Calendar's default filename. Why not?
+		'filename' => 'basic',
+
+		// Query args; mostly copied from EO_Event_List_Widget.
+		'posts_per_page'   => -1,
+		'post_type'        => 'event',
+		'suppress_filters' => false,
+		'orderby'          => 'eventstart',
+		'order'            => 'ASC',
+		'showrepeats'      => 1,
+		'group_events_by'  => '',
+		'showpastevents'   => true,
+
+		// Custom query args
+		'post_status'      => array( 'publish' ),
+	) );
+
+	// Correct format for 'showpastevents' variable
+	if ( 'false' === strtolower( $r['showpastevents'] ) ) {
+		$r['showpastevents'] = 0;
+	}
+
+	$filename = sanitize_title( $r['filename'] ) . '.ics';
+
+	// Override iCalendar name
+	$name = esc_attr( $r['name'] );
+	if ( ! empty( $name ) ) {
+		add_filter( 'pre_option_blogname', create_function( '', "
+			return '" . $name . "';
+		" ) );
+	}
+
+	// Do our query.
+	unset( $r['filename'], $r['name'] );
+	$GLOBALS['wp_query'] = new WP_Query( $r );
+
+	// Prevent browsers from caching
+	nocache_headers();
+
+	// iCal time!
+	Event_Organiser_Im_Export::get_object()->export_events( $filename, null );
+}
+
+/**
  * Output the iCal link for an event.
  *
  * @param int $post_id The post ID.

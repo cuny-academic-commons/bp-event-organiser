@@ -22,3 +22,20 @@ if ( bp_is_user() ) {
 }
 
 echo eo_get_event_fullcalendar( $args );
+
+// iCalendar download
+echo '<div id="bpeo-ical-download">';
+
+echo '<h3>' . __( 'Subscribe', 'bp-event-organiser' ) . '</h3>';
+
+if ( bp_is_user() ) {
+	echo '<ul>';
+	echo '<li><a class="bpeo-ical-link" href="' . bp_displayed_user_domain() . bpeo_get_events_slug() . '/ical/" title="' . __( 'Only public events are listed in this iCalendar. Suitable for sharing.', 'bp-event-organiser' ) . '"><span class="icon"></span>' . __( 'Download iCalendar file (Public)', 'bp-event-organiser' ) . '</a></li>';
+
+	if ( bp_is_my_profile() ) {
+		echo '<li><a class="bpeo-ical-link" href="' . bpeo_get_the_user_private_ical_url() . '" title="' . __( 'Both public and private events are listed in this iCalendar.  Be mindful of who you share this with.', 'bp-event-organiser' ) . '"><span class="icon"></span>' . __( 'Download iCalendar file (Private)', 'bp-event-organiser' ) . '</a></li>';
+	}
+	echo '</ul>';
+}
+
+echo '</div>';
