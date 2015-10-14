@@ -135,6 +135,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		$subnav = array();
 
+		$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
+
 		// Common params to all nav items
 		$default_params = array(
 			'parent_url'        => bpeo_get_group_permalink(),
@@ -163,19 +165,13 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'link'            => bpeo_get_group_permalink() . 'upcoming/',
 		), $default_params );
 
-		// Show 'Manage' tab if group is not public
-		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
-			// We only allow group admins to see this tab
-			$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
-
-			$sub_nav[] = array_merge( array(
-				'name'            => __( 'Manage', 'bp-event-organiser' ),
-				'slug'            => 'manage',
-				'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
-				'position'        => 0,
-				'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
-			), $default_params );
-		}
+		$sub_nav[] = array_merge( array(
+			'name'            => __( 'Manage', 'bp-event-organiser' ),
+			'slug'            => 'manage',
+			'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
+			'position'        => 0,
+			'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
+		), $default_params );
 
 		if ( current_user_can( 'connect_event_to_group', bp_get_current_group_id() ) ) {
 			$sub_nav[] = array_merge( array(
