@@ -727,6 +727,75 @@ function bpeo_group_events_embed_remove_all_assets() {
 /** iCal *********************************************************************/
 
 /**
+ * Get the private iCalendar hash for a group.
+ *
+ * If hash doesn't exist, we generate it and save it for the group. You can
+ * generate a new hash by setting $reset to true.
+ *
+ * @param  int  $group_id The group ID
+ * @param  bool $reset    Resets the private hash for the group. Default: false.
+ * @return string|bool
+ */
+function bpeo_get_the_group_private_ical_hash( $group_id = 0, $reset = false ) {
+	if ( empty( $group_id ) ) {
+		$group_id = bp_get_current_group_id();
+	}
+
+	if ( empty( $group_id ) ) {
+		return false;
+	}
+
+	if ( false === $reset ) {
+		$hash = groups_get_groupmeta( $group_id, 'bpeo_private_ical_hash' );
+	} else {
+		$hash = '';
+	}
+
+	if ( empty( $hash ) ) {
+		$hash = md5( uniqid( '' ) );
+		groups_update_groupmeta( $group_id, 'bpeo_private_ical_hash', $hash );
+	}
+
+	return $hash;
+}
+
+/**
+ * Output the private iCalendar URL for a group.
+ *
+ * @param int $group_id The group ID
+ */
+function bpeo_the_group_private_ical_url( $group_id = 0 ) {
+	echo bpeo_get_the_group_private_ical_url( $group_id = 0 );
+}
+	/**
+	 * Get the private iCalendar URL for a group.
+	 *
+	 * @param  int $group_id The group ID
+	 * @return string|bool
+	 */
+	function bpeo_get_the_group_private_ical_url( $group_id = 0 ) {
+		if ( empty( $group_id ) ) {
+			$group_id = bp_get_current_group_id();
+		}
+
+		if ( empty( $group_id ) ) {
+			return false;
+		}
+
+		if ( $group_id == bp_get_current_group_id() ) {
+			$group = groups_get_current_group();
+
+		} else {
+			$group = groups_get_group( array(
+				'group_id'        => $group_id,
+				'populate_extras' => false
+			) );
+		}
+
+		return trailingslashit( esc_url( bpeo_get_group_permalink( $group ) . bpeo_get_the_group_private_ical_hash( $group_id ) . '/ical' ) );
+	}
+
+/**
  * Allow iCal feeds to be populated for group members.
  *
  * By default, WordPress limits private posts to the author of the post. This

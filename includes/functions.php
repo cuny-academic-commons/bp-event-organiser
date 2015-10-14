@@ -176,12 +176,14 @@ function bpeo_the_filter_title() {
  *     for full list of arguments, as well as {@link WP_Query}.
  *
  *     @type string $name     Name of the iCalendar. This shows up in the iCalendar file header.
+ *     @type string $url      URL of source. This shows up in the iCalendar file header.
  *     @type string $filename Filename for the iCal download.
  * }
  */
 function bpeo_do_ical_download( $r = array() ) {
 	$r = wp_parse_args( $r, array(
 		'name' => '',
+		'url'  => '',
 
 		// Emulate Google Calendar's default filename. Why not?
 		'filename' => 'basic',
@@ -215,12 +217,21 @@ function bpeo_do_ical_download( $r = array() ) {
 		" ) );
 	}
 
+	// Override iCalendar URL
+	$url = esc_url( $r['url'] );
+	if ( ! empty( $url ) ) {
+		add_filter( 'post_type_archive_link', create_function( '', "
+			return '" . $url . "';
+		" ) );
+	}
+
 	// Do our query.
-	unset( $r['filename'], $r['name'] );
+	unset( $r['filename'], $r['name'], $r['url'] );
 	$GLOBALS['wp_query'] = new WP_Query( $r );
 
-	// Prevent browsers from caching
+	// Set proper headers
 	nocache_headers();
+	status_header( 200 );
 
 	// iCal time!
 	Event_Organiser_Im_Export::get_object()->export_events( $filename, null );

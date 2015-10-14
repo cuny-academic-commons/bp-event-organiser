@@ -561,6 +561,7 @@ class BPEO_Component extends BP_Component {
 	protected function ical_action() {
 		$args = array(
 			'filename' => bp_get_displayed_user_username(),
+			'url'      => bp_displayed_user_domain()
 		);
 
 		// public iCal

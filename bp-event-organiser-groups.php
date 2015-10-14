@@ -144,29 +144,45 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'parent_slug'       => buddypress()->groups->current_group->slug . '_events',
 
 			'screen_function'   => array( $this, '_display_hook' ),
-			'user_has_access'   => buddypress()->groups->current_group->is_user_member,
 			'show_in_admin_bar' => true,
 		);
 
 		$sub_nav[] = array_merge( array(
-			'name'     => __( 'Calendar', 'bp-event-organiser' ),
-			'slug'     => 'calendar',
-			'position' => 0,
-			'link'     => bpeo_get_group_permalink(),
+			'name'            => __( 'Calendar', 'bp-event-organiser' ),
+			'slug'            => 'calendar',
+			'user_has_access' => buddypress()->groups->current_group->is_user_member,
+			'position'        => 0,
+			'link'            => bpeo_get_group_permalink(),
 		), $default_params );
 
 		$sub_nav[] = array_merge( array(
-			'name'     => __( 'Upcoming', 'bp-event-organiser' ),
-			'slug'     => 'upcoming',
-			'position' => 0,
-			'link'     => bpeo_get_group_permalink() . 'upcoming/',
+			'name'            => __( 'Upcoming', 'bp-event-organiser' ),
+			'slug'            => 'upcoming',
+			'user_has_access' => buddypress()->groups->current_group->is_user_member,
+			'position'        => 0,
+			'link'            => bpeo_get_group_permalink() . 'upcoming/',
 		), $default_params );
+
+		// Show 'Manage' tab if group is not public
+		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			// We only allow group admins to see this tab
+			$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
+
+			$sub_nav[] = array_merge( array(
+				'name'            => __( 'Manage', 'bp-event-organiser' ),
+				'slug'            => 'manage',
+				'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
+				'position'        => 0,
+				'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
+			), $default_params );
+		}
 
 		if ( current_user_can( 'connect_event_to_group', bp_get_current_group_id() ) ) {
 			$sub_nav[] = array_merge( array(
-				'name'     => __( 'New Event', 'bp-event-organiser' ),
-				'slug'     => bpeo_get_events_new_slug(),
-				'position' => 99,
+				'name'            => __( 'New Event', 'bp-event-organiser' ),
+				'slug'            => bpeo_get_events_new_slug(),
+				'user_has_access' => buddypress()->groups->current_group->is_user_member,
+				'position'        => 99,
 			), $default_params );
 		}
 
@@ -206,6 +222,11 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		// upcoming
 		} elseif ( bp_is_action_variable( 'upcoming', 0 ) ) {
 			add_action( 'bp_template_content', array( $this, 'call_display' ) );
+
+		// iCal
+		} elseif ( bp_is_action_variable( 'ical' ) || true === ctype_xdigit( bp_action_variable() ) ) {
+			$this->ical_action();
+			return;
 
 		// single event
 		} elseif ( ! empty( buddypress()->action_variables ) ) {
@@ -488,6 +509,42 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	}
 
 	/**
+	 * Validate iCalendar download.
+	 */
+	protected function ical_action() {
+		$args = array(
+			'filename' => bp_get_group_slug( groups_get_current_group() ),
+			'bp_group' => bp_get_current_group_id(),
+			'url'      => bpeo_get_group_permalink()
+		);
+
+		// public iCal
+		if ( bp_is_action_variable( 'ical' ) && 'public' === bp_get_group_status( groups_get_current_group() ) ) {
+			$args['name'] = bp_get_group_name( groups_get_current_group() );
+
+		// private iCal
+		} else {
+			if ( false === bp_is_action_variable( bpeo_get_the_group_private_ical_hash() ) ) {
+				return;
+			}
+
+			if ( false === bp_is_action_variable( 'ical', 1 ) ) {
+				return;
+			}
+
+			$args['name'] = sprintf( __( '%s (Private)', 'bp-event-organiser' ), bp_get_group_name( groups_get_current_group() ) );
+		}
+
+		// Sanity check
+		if ( empty( $args['name' ]) ) {
+			return;
+		}
+
+		// iCal time!
+		bpeo_do_ical_download( $args );
+	}
+
+	/**
 	 * Returns the post title without the post status prefixed to it.
 	 *
 	 * @param  string  $retval sprintf format for the title with the prefixed post status
@@ -496,6 +553,26 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 */
 	public function no_post_status_title( $retval, $post ) {
 		return $post->post_title;
+	}
+
+	/**
+	 * Custom hook on "Manage Events" screen to catch "Reset private URL" action.
+	 */
+	public function call_edit_screen_template_loader( $group_id = null ) {
+		// 'Reset Private URL' action
+		if ( ! empty( $_GET['bpeo-reset'] ) ) {
+			check_admin_referer( 'bpeo_group_reset_private_ical', 'bpeo-reset' );
+
+			// reset hash
+			bpeo_get_the_group_private_ical_hash( bp_get_current_group_id(), true );
+
+			bp_core_add_message( __( 'Private iCalendar URL has been reset. Please copy the new link below to use in your calendar application.', 'bp-event-organiser' ) );
+			bp_core_redirect( trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->slug ) );
+			die();
+		}
+
+		// Do what the parent extension does.
+		parent::call_edit_screen_template_loader( $group_id );
 	}
 
 	/**
@@ -511,7 +588,19 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		<label for="bpeo-group-member-role-member"><input type="radio" <?php checked( 'member', $setting ) ?> value="member" name="bpeo-group-member-role" id="bpeo-group-member-role-member" /> <?php esc_html_e( 'Any group member may connect events to this group', 'bp-event-organiser' ) ?></label>
 		<label for="bpeo-group-member-role-admin_mod"><input type="radio" <?php checked( 'admin_mod', $setting ) ?> value="admin_mod" name="bpeo-group-member-role" id="bpeo-group-member-role-admin_mod" /> <?php esc_html_e( 'Only administrators and moderators may connect events to this group', 'bp-event-organiser' ) ?></label>
 		<br />
+
 		<?php
+		// Only show iCalendar settings if group is not public
+		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			// use our template stack
+			add_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+
+			// load our template part
+			eo_get_template_part( 'buddypress/events/manage-group-ical' );
+
+			// remove our template stack
+			remove_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+		}
 	}
 
 	/**
