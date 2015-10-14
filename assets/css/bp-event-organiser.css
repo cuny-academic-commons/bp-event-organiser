@@ -103,3 +103,8 @@ ul.bpeo-upcoming-events li {
 .bpeo-upcoming-event-title {
 	font-weight: bold;
 }
+
+/* Group > Manage > Events */
+body.group-admin.events #bp-group-edit-events-submit-wrapper {
+	margin-top: 2em;
+}

@@ -22,6 +22,3 @@
 			'link_title' => __( 'This will invalidate the existing private iCalendar link and generate a new link.', 'bp-event-organiser' )
 		) );
 	?>
-
-	<?php /* Temp */ ?>
-	<input type="submit" style="display:none;" />
