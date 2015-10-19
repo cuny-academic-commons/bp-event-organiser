@@ -192,7 +192,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 */
 	public function _display_hook() {
 		// add event subnav
-		if ( empty( $_GET['embed'] ) ) {
+		if ( empty( $_GET['embedded'] ) ) {
 			add_action( 'bp_template_content', array( $this, 'add_subnav' ) );
 		}
 
