@@ -34,30 +34,21 @@ function bpeo_register_assets() {
 add_action( 'wp_enqueue_scripts',    'bpeo_register_assets', 5 );
 add_action( 'admin_enqueue_scripts', 'bpeo_register_assets', 5 );
 
-
 /**
- * Remove the New > Event item from the WP toolbar.
+ * Filters the CPT arguments for Event Organiser.
  *
- * We grant all logged-in users the ability to create events, but we don't want all users to see the Event item in the
- * "New" dropdown.
+ * Currently, we do not allow any admin bar items to display for EO since we
+ * grant all logged-in users the ability to create events, but we do not want
+ * all users to see the Event item in the "New" dropdown.
+ *
+ * @param  array $args Current post type args.
+ * @return array
  */
-function bpeo_remove_new_event_button_from_toolbar( $wp_admin_bar ) {
-	$wp_admin_bar->remove_node( 'new-event' );
-
-	// If the New menu is now empty, remove it. No better way to do it than this....
-	$new_has_children = false;
-	foreach ( $wp_admin_bar->get_nodes() as $n ) {
-		if ( 'new-content' === $n->parent ) {
-			$new_has_children = true;
-			break;
-		}
-	}
-
-	if ( ! $new_has_children ) {
-		$wp_admin_bar->remove_node( 'new-content' );
-	}
+function bpeo_filter_register_post_type_args( $args = array() ) {
+	$args['show_in_admin_bar'] = false;
+	return $args;
 }
-add_action( 'admin_bar_menu', 'bpeo_remove_new_event_button_from_toolbar', 100 );
+add_filter( 'eventorganiser_event_properties', 'bpeo_filter_register_post_type_args' );
 
 /**
  * Check if we're on a BPEO events page.
