@@ -603,10 +603,10 @@ add_action( 'eventorganiser_additional_event_meta', 'bpeo_list_connected_groups'
 /**
  * Should we load our override template for embedding group events?
  *
- * We only override if we're on a group events page and if '?embed=true' is
+ * We only override if we're on a group events page and if '?embedded=true' is
  * to the URL:
- * - example.com/groups/GROUP/events/?embed=true - Will show group calendar
- * - example.com/groups/GROUP/events/upcoming/?embed=true - Will show a list
+ * - example.com/groups/GROUP/events/?embedded=true - Will show group calendar
+ * - example.com/groups/GROUP/events/upcoming/?embedded=true - Will show a list
  *   of upcoming events
  *
  * This is done so we can remove the header and footer so embedding can be
@@ -722,6 +722,8 @@ function bpeo_group_events_embed_remove_all_assets() {
 
 	$scripts = wp_scripts();
 	$scripts->queue = array();
+
+	wp_enqueue_style( 'dashicons' );
 }
 
 /** iCal *********************************************************************/

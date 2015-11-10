@@ -14,6 +14,8 @@
 	<style type="text/css">
 	body {font-family:sans-serif;}
 	h3 {display:none;}
+	#bpeo-ical-download h3 {display:block;}
+	#bpeo-ical-download ul {padding-left:0;}
 	</style>
 </head>
 
