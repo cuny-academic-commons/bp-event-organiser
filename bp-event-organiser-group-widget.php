@@ -141,7 +141,6 @@ class BPEO_Group_Widget extends WP_Widget {
 	public function form( $instance ) {
 		// Defaults
 		$instance = wp_parse_args( (array) $instance, array(
-			'sortby' => 'post_title',
 			'title' => '',
 			'group_id' => '',
 			'height' => ''
@@ -156,9 +155,6 @@ class BPEO_Group_Widget extends WP_Widget {
 			'per_page' => null,
 			'page' => null,
 			'update_meta_cache' => false,
-
-			// Do we allow hidden groups to be embedded?
-			//'show_hidden' =>
 		) );
 
 		if ( ! empty( $groups['groups'] ) ) {
@@ -171,6 +167,8 @@ class BPEO_Group_Widget extends WP_Widget {
 				<option value="" <?php selected( $instance['group_id'], '' ); ?>><?php esc_html_e( '--- Select a group ---', 'bpeo-group-widget' ); ?></option>
 
 				<?php foreach ( $groups['groups'] as $i => $group ) : ?>
+					<?php if ( 'public' !== $group->status ) { continue; } ?>
+
 					<option value="<?php echo esc_attr( $group->id ); ?>" <?php selected( $instance['group_id'], $group->id ); ?>><?php echo esc_html( apply_filters( 'bp_get_group_name', $group->name ) ); ?></option>
 				<?php endforeach; ?>
 			</select></p>
