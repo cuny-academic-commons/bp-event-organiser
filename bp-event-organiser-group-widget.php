@@ -69,6 +69,10 @@ class BPEO_Group_Widget extends WP_Widget {
 		$height = ! empty( $instance['height'] ) ? 'height="' . (int) $instance['height'] . '"' : '';
 
 		$group_id = ! empty( $instance['group_id'] ) ? (int) $instance['group_id'] : false;
+
+		// BP Groupblog fallback support
+		$group_id = empty( $group_id ) && function_exists( 'get_groupblog_group_id' ) ? get_groupblog_group_id( get_current_blog_id() ) : $group_id;
+
 		if ( empty( $group_id ) ) {
 			return;
 		}
@@ -148,6 +152,13 @@ class BPEO_Group_Widget extends WP_Widget {
 
 		$title = esc_attr( $instance['title'] );
 
+		$group_id = $instance['group_id'];
+
+		// BP Groupblog fallback support
+		$group_id = empty( $group_id ) && function_exists( 'get_groupblog_group_id' ) ? get_groupblog_group_id( get_current_blog_id() ) : $group_id;
+
+		$group_id = ! empty( $group_id ) ? $group_id : '';
+
 		$groups = groups_get_groups( array(
 			'type' => 'alphabetical',
 			'order' => 'ASC',
@@ -164,12 +175,12 @@ class BPEO_Group_Widget extends WP_Widget {
 
 			<p><label for="<?php echo $this->get_field_id('group_id'); ?>" title="<?php esc_attr_e( 'Select the group you want to display events for.', 'bpeo-group-widget' ); ?>"><?php _e( 'Group:', 'bpeo-group-widget' ); ?></label>
 			<select class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'group_id' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'group_id' ) ); ?>">
-				<option value="" <?php selected( $instance['group_id'], '' ); ?>><?php esc_html_e( '--- Select a group ---', 'bpeo-group-widget' ); ?></option>
+				<option value="" <?php selected( $group_id, '' ); ?>><?php esc_html_e( '--- Select a group ---', 'bpeo-group-widget' ); ?></option>
 
 				<?php foreach ( $groups['groups'] as $i => $group ) : ?>
 					<?php if ( 'public' !== $group->status ) { continue; } ?>
 
-					<option value="<?php echo esc_attr( $group->id ); ?>" <?php selected( $instance['group_id'], $group->id ); ?>><?php echo esc_html( apply_filters( 'bp_get_group_name', $group->name ) ); ?></option>
+					<option value="<?php echo esc_attr( $group->id ); ?>" <?php selected( $group_id, $group->id ); ?>><?php echo esc_html( apply_filters( 'bp_get_group_name', $group->name ) ); ?></option>
 				<?php endforeach; ?>
 			</select></p>
 
