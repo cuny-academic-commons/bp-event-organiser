@@ -14,6 +14,8 @@
 	<style type="text/css">
 	body {font-family:sans-serif;}
 	h3 {display:none;}
+	a {color:inherit;}
+	ul.bpeo-upcoming-events {list-style-type:disc; padding-left:10px;}
 	#bpeo-ical-download h3 {display:block;}
 	#bpeo-ical-download ul {padding-left:0;}
 	</style>

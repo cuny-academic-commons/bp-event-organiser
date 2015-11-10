@@ -66,6 +66,8 @@ class BPEO_Group_Widget extends WP_Widget {
 		 */
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'My Events', 'bpeo-group-widget' ) : $instance['title'], $instance, $this->id_base );
 
+		$height = ! empty( $instance['height'] ) ? 'height="' . (int) $instance['height'] . '"' : '';
+
 		$group_id = ! empty( $instance['group_id'] ) ? (int) $instance['group_id'] : false;
 		if ( empty( $group_id ) ) {
 			return;
@@ -96,10 +98,10 @@ class BPEO_Group_Widget extends WP_Widget {
 		}
 	?>
 
-		<iframe src="<?php echo esc_url( $link ); ?>" width="100%"></iframe>
+		<iframe src="<?php echo esc_url( $link ); ?>" width="100%" <?php echo $height; ?>></iframe>
 
 	<?php
-		echo $args['after_widget'];		
+		echo $args['after_widget'];
 	}
 
 	/**
@@ -124,6 +126,12 @@ class BPEO_Group_Widget extends WP_Widget {
 			$instance['type'] = 'list';
 		}
 
+		if ( ! empty( $new_instance['height'] ) ) {
+			$instance['height'] = (int) $new_instance['height'];
+		} else {
+			$instance['height'] = 0;
+		}
+
 		return $instance;
 	}
 
@@ -135,7 +143,8 @@ class BPEO_Group_Widget extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, array(
 			'sortby' => 'post_title',
 			'title' => '',
-			'group_id' => ''
+			'group_id' => '',
+			'height' => ''
 		) );
 
 		$title = esc_attr( $instance['title'] );
@@ -157,8 +166,7 @@ class BPEO_Group_Widget extends WP_Widget {
 
 			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'bpeo-group-widget' ); ?></label> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" /></p>
 
-			<p><label for="<?php echo $this->get_field_id('group_id'); ?>"><?php _e( 'Group:', 'bpeo-group-widget' ); ?></label>
-
+			<p><label for="<?php echo $this->get_field_id('group_id'); ?>" title="<?php esc_attr_e( 'Select the group you want to display events for.', 'bpeo-group-widget' ); ?>"><?php _e( 'Group:', 'bpeo-group-widget' ); ?></label>
 			<select class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'group_id' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'group_id' ) ); ?>">
 				<option value="" <?php selected( $instance['group_id'], '' ); ?>><?php esc_html_e( '--- Select a group ---', 'bpeo-group-widget' ); ?></option>
 
@@ -167,12 +175,15 @@ class BPEO_Group_Widget extends WP_Widget {
 				<?php endforeach; ?>
 			</select></p>
 
-			<p><label for="<?php echo $this->get_field_id('type'); ?>"><?php _e( 'Embed Type:', 'bpeo-group-widget' ); ?></label>
+			<p><label for="<?php echo $this->get_field_id('type'); ?>" title="<?php esc_attr_e( 'Embed type. Note: Calendar type only works well for large widget areas', 'bpeo-group-widget' ); ?>"><?php _e( 'Embed Type:', 'bpeo-group-widget' ); ?></label>
 
 			<select class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>">
 				<option value="list" <?php selected( $instance['type'], 'list' ); ?>><?php esc_html_e( 'List of upcoming events', 'bpeo-group-widget' ); ?></option>
 				<option value="calendar" <?php selected( $instance['type'], 'calendar' ); ?>><?php esc_html_e( 'Calendar', 'bpeo-group-widget' ); ?></option>
 			</select></p>
+
+			<p><label for="<?php echo $this->get_field_id( 'height' ); ?>" title="<?php esc_attr_e( 'Height of the group widget. Set this to a larger number if desired.', 'bpeo-group-widget' ); ?>"><?php _e( 'Height:' ); ?></label>
+			<input id="<?php echo $this->get_field_id( 'height' ); ?>" name="<?php echo $this->get_field_name( 'height' ); ?>" type="text" value="<?php echo empty( $instance['height'] ) ? '' :  $instance['height']; ?>" size="3" /></p>
 
 <?php
 		} else {
