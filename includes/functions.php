@@ -605,6 +605,76 @@ add_filter( 'pre_transient_eo_full_calendar_public', '__return_empty_array' );
 add_filter( 'pre_transient_eo_full_calendar_public_priv', '__return_empty_array' );
 
 /**
+ * Add the Room field to the Event editing metabox.
+ *
+ * @param WP_Post $post Post currently being edited.
+ */
+function bpeo_add_room_field_to_metabox( WP_Post $post ) {
+	if ( ! taxonomy_exists( 'event-venue' ) ) {
+		return;
+	}
+
+	$room = get_post_meta( $post->ID, 'bpeo_room', true );
+
+	?>
+
+	<div class="eo-grid-row eo-room">
+		<div class="eo-grid-4">
+			<label for="room"><?php esc_html_e( 'Room:', 'bp-event-organiser' ); ?></label>
+		</div>
+		<div class="eo-grid-8">
+			<input type="text" id="room" name="eo_input[room]" value="<?php echo esc_attr( $room ); ?>" />
+		</div>
+
+		<?php wp_nonce_field( 'bpeo_room_' . $post->ID, 'bpeo-room-nonce', false ); ?>
+	</div>
+
+	<?php
+}
+add_action( 'eventorganiser_metabox_additional_fields', 'bpeo_add_room_field_to_metabox' );
+
+/**
+ * Save Room data when an event is saved.
+ *
+ * Fired with priority 15 to follow `eventorganiser_details_save()`.
+ *
+ * @param int $post_id ID of the post being edited.
+ */
+function bpeo_save_room_field_on_post_save( $post_id ) {
+	if ( ! isset( $_POST['bpeo-room-nonce'] ) || ! wp_verify_nonce( $_POST['bpeo-room-nonce'], 'bpeo_room_' . $post_id ) ) {
+		return;
+	}
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_event', $post_id ) ) {
+		return;
+	}
+
+	$room = isset( $_POST['eo_input']['room'] ) ? wp_unslash( $_POST['eo_input']['room'] ) : '';
+
+	update_post_meta( $post_id, 'bpeo_room', $room );
+}
+add_action( 'save_post', 'bpeo_save_room_field_on_post_save', 15 );
+
+/**
+ * Display Room info on event page.
+ *
+ * Hooked at priority 0 so it's directly after Venue.
+ */
+function bpeo_list_room() {
+	$room = get_post_meta( get_the_ID(), 'bpeo_room', true );
+	if ( ! $room ) {
+		return;
+	}
+
+	printf( '<li><strong>' . esc_html( 'Room:', 'bp-event-organiser' ) . '</strong> %s</li>', esc_html( $room ) );
+}
+add_action( 'eventorganiser_additional_event_meta', 'bpeo_list_room', 0 );
+
+/**
  * Get an item's calendar color.
  *
  * Will select one randomly from a whitelist if not found.
