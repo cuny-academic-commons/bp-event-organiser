@@ -108,3 +108,8 @@ ul.bpeo-upcoming-events li {
 body.group-admin.events #bp-group-edit-events-submit-wrapper {
 	margin-top: 2em;
 }
+
+/* BuddyPress Companion Stylesheet overrides */
+#buddypress .eo-fullcalendar table {
+	margin: inherit;
+}
