@@ -3,11 +3,14 @@ var bpeoGroupMsg = BpEventOrganiserSettings.group_privacy_message,
 	bpeoCurrStatus = '';
 
 jQuery(function($){
+	var select2obj;
+
 	bpeoCurrStatus = $('#post-status-display').text();
 	bpeoCurrVisibility = $('#post-visibility-display').text();
 	bpeoSelect = $('#bp_event_organiser_metabox select');
 	bpeoPrivateFlag = bpeoSelect.find('[title]').length;
 	bpeoSubmit = $('#submitdiv .inside');
+
 
 	bpeoToggle = function() {
 		var notice = bpeoSubmit.find('.updated');
@@ -79,7 +82,7 @@ jQuery(function($){
 		return markup;
 	}
 
-	bpeoSelect.select2({
+	select2obj = bpeoSelect.select2({
 		ajax: {
 			method: 'POST',
 			url: ajaxurl,
@@ -124,4 +127,28 @@ jQuery(function($){
 	bpeoSelect.on("select2:unselect select2:select", function (e) {
 		bpeoToggle();
 	});
+
+	bpeoSelect.on( 'change', function() {
+		checkGroupOrganizer();
+	} );
+
+	if ( select2obj ) {
+		var $silent_wrapper = $( '#bpeo-silent-wrapper' );
+
+		// Move the silent checkbox to where it belongs.
+		$silent_wrapper.insertBefore( '#publishing-action' );
+
+		function checkGroupOrganizer() {
+			// If a group has been selected, and we haven't already added the silent-ness
+			// checkbox, then add it
+			var groups = select2obj.val();
+			if ( groups && groups.length >= 1 ) {
+				$silent_wrapper.show();
+			} else {
+				$silent_wrapper.hide();
+			}
+		}
+
+		checkGroupOrganizer();
+	}
 });

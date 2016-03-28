@@ -598,6 +598,40 @@ function bpeo_list_connected_groups() {
 }
 add_action( 'eventorganiser_additional_event_meta', 'bpeo_list_connected_groups' );
 
+/**
+ * Render the "Silent" checkbox during event creation/editing.
+ */
+function bpeo_render_silent_checkbox( $post_type, $location, $post ) {
+	// Only do this on the front end.
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Only do this for events.
+	if ( 'event' !== $post_type ) {
+		return;
+	}
+
+	// Only do this for 'side'.
+	if ( 'side' !== $location ) {
+		return;
+	}
+
+	// Create vs Edit.
+	if ( ! $post->ID || 'auto-draft' === $post->post_status ) {
+		$title = __( 'Silent Create', 'bp-event-organiser' );
+	} else {
+		$title = __( 'Silent Edit', 'bp-event-organiser' );
+	}
+
+	?>
+	<p id="bpeo-silent-wrapper" style="display:none">
+		<label for="bp_event_organiser_silent"><input type="checkbox" value="silent" id="bp_event_organiser_silent" name="bpeo-silent"></input> <strong><?php echo esc_html( $title ); ?></strong> <?php esc_html_e( '(notifications will not be sent to subscribed group members)', 'bp-event-organiser' ); ?>
+	</p>
+	<?php
+}
+add_action( 'do_meta_boxes', 'bpeo_render_silent_checkbox', 10, 3 );
+
 /** Embed ********************************************************************/
 
 /**
@@ -867,6 +901,11 @@ function bpeo_send_bpges_notification_for_user( $send_it, $activity, $user_id ) 
 	global $_bpeo_bpges_sent;
 
 	if ( 'groups' !== $activity->component || 0 !== strpos( $activity->type, 'bpeo_' ) ) {
+		return $send_it;
+	}
+
+	if ( isset( $_POST['bpeo-silent'] ) ) {
+		$send_it = false;
 		return $send_it;
 	}
 

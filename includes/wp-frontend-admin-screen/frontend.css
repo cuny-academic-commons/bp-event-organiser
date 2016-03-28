@@ -99,6 +99,10 @@ div.error {
 
 /* from /wp-admin/css/forms.css */
 
+.submitbox {
+	position: relative;
+}
+
 #misc-publishing-actions label[for="post_status"]:before {
 	content: '\f173';
 	display: inline-block;
@@ -180,5 +184,9 @@ div.error {
 
 #major-publishing-actions, #minor-publishing-actions, #misc-publishing-actions p {margin-top: 1em;}
 
-#major-publishing-actions {float:right; padding-top:13px;}
+#major-publishing-actions {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
 	#delete-action a {color:#a00;}

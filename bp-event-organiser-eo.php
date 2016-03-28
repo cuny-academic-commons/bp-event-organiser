@@ -246,7 +246,6 @@ class BuddyPress_Event_Organiser_EO {
 			'side', //'normal',
 			'core' //'high'
 		);
-
 	}
 
 
