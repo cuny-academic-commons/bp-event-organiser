@@ -19,22 +19,43 @@ function bpeo_get_events_new_slug() {
 
 /**
  * Register common assets.
+ *
+ * No longer used. See https://github.com/cuny-academic-commons/bp-event-organiser/issues/48.
  */
 function bpeo_register_assets() {
+	// Deprecated. See bpeo_enqueue_assets() and issue #48.
+}
+
+/**
+ * Register and enqueue common assets.
+ *
+ * Because of reported conflicts between our version of Select2 and that required by other plugins, we register
+ * scripts only when they're needed. This minimizes the chances of mismatches.
+ */
+function bpeo_enqueue_assets() {
 	// Select2
 	if ( false === wp_script_is( 'select2' ) ) {
-		wp_register_script( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js', array( 'jquery' ) );
+		wp_enqueue_script( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js', array( 'jquery' ) );
 	}
 	if ( false === wp_style_is( 'select2' ) ) {
-		wp_register_style( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css' );
+		wp_enqueue_style( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css' );
 	}
 
-	wp_register_script( 'bp_event_organiser_js', BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/js/bp-event-organiser.js', array( 'jquery' ), BUDDYPRESS_EVENT_ORGANISER_VERSION, true );
+	wp_enqueue_script( 'bp_event_organiser_js', BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/js/bp-event-organiser.js', array( 'jquery' ), BUDDYPRESS_EVENT_ORGANISER_VERSION, true );
 
-	wp_register_script( 'bpeo-group-select', BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/js/group-select.js', array( 'jquery', 'select2' ), BUDDYPRESS_EVENT_ORGANISER_VERSION, true );
+	wp_enqueue_script( 'bpeo-group-select', BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/js/group-select.js', array( 'jquery', 'select2' ), BUDDYPRESS_EVENT_ORGANISER_VERSION, true );
+
+	wp_localize_script( 'bp_event_organiser_js', 'BpEventOrganiserSettings', array(
+		'calendar_filter_title' => __( 'Filters', 'bp-event-organiser' ),
+		'calendar_author_filter_title' => __( 'By Author', 'bp-event-organiser' ),
+		'calendar_group_filter_title' => __( 'By Group', 'bp-event-organiser' ),
+		'loggedin_user_id' => bp_loggedin_user_id()
+	) );
+
+	wp_localize_script( 'bpeo-group-select', 'BpEventOrganiserSettings', array(
+		'group_privacy_message' => __( 'You have added a group to this event.  Since groups have their own privacy settings, we have removed the ability to set the status for this event.', 'bp-event-organiser' ),
+	) );
 }
-add_action( 'wp_enqueue_scripts',    'bpeo_register_assets', 5 );
-add_action( 'admin_enqueue_scripts', 'bpeo_register_assets', 5 );
 
 /**
  * Filters the CPT arguments for Event Organiser.
