@@ -101,6 +101,10 @@ ul.bpeo-upcoming-events li {
 }
 
 .bpeo-upcoming-event-title {
+	padding-left: 180px;
+}
+
+.bpeo-upcoming-event-title a {
 	font-weight: bold;
 }
 
