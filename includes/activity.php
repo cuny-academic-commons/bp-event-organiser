@@ -85,7 +85,7 @@ function bpeo_create_activity_for_event( $event_id, $event = null, $update = nul
 			break;
 	}
 
-	$hide_sitewide = 'public' !== $event->post_status;
+	$hide_sitewide = 'publish' !== $event->post_status;
 
 	$activity_args = array(
 		'component' => 'events',
