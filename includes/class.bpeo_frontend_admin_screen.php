@@ -60,6 +60,13 @@ class BPEO_Frontend_Admin_Screen extends WP_Frontend_Admin_Screen {
 		if ( class_exists( 'Shortcode_UI', false ) && is_callable( array( Shortcode_UI::get_instance(), 'action_media_buttons' ) ) ) {
 			remove_action( 'media_buttons', array( Shortcode_UI::get_instance(), 'action_media_buttons' ) );
 		}
+
+		/**
+		 * Broadcast that the edit screen is about to be rendered.
+		 *
+		 * @since 0.2
+		 */
+		do_action( 'bpeo_edit_screen_before_display' );
 	}
 
 	/**
