@@ -452,34 +452,37 @@ add_filter( 'template_include', 'bpeo_remove_default_canonical_event_content', 2
  * @see bpeo_remove_default_canonical_event_content()
  *
  * @param  string $content Current content.
- * @return string
+ * @return string $content The modified content.
  */
 function bpeo_canonical_event_content( $content ) {
 	global $pages;
 
-	// reset get_the_content() to use already-rendered content so we can use it in
-	// our content-eo-event.php template part
-	//
-	// get_the_content() is weird and checks the $pages global for the content
-	// so let's use the rendered content here and set it in the $pages global
-	$pages[0] = $content;
+	// sanity check
+	if ( is_singular( 'event' ) && get_post_type( get_the_ID() ) == 'event' ) {
+		// reset get_the_content() to use already-rendered content so we can use it in
+		// our content-eo-event.php template part
+		//
+		// get_the_content() is weird and checks the $pages global for the content
+		// so let's use the rendered content here and set it in the $pages global
+		$pages[0] = $content;
 
-	// remove all filters for 'the_content' to prevent recursion when using
-	// 'the_content' again
-	bp_remove_all_filters( 'the_content' );
+		// remove all filters for 'the_content' to prevent recursion when using
+		// 'the_content' again
+		bp_remove_all_filters( 'the_content' );
 
-	// buffer the template part
-	ob_start();
-	eo_get_template_part( 'content-eo', 'event' );
-	$tpart = ob_get_contents();
-	ob_end_clean();
+		// buffer the template part
+		ob_start();
+		eo_get_template_part( 'content-eo', 'event' );
+		$content = ob_get_contents();
+		ob_end_clean();
 
-	// restore filters for 'the_content'
-	bp_restore_all_filters( 'the_content' );
+		// restore filters for 'the_content'
+		bp_restore_all_filters( 'the_content' );
 
-	remove_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+		remove_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+	}
 
-	return $tpart;
+	return $content;
 }
 
 /**
