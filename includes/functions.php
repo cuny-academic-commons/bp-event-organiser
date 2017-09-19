@@ -452,10 +452,20 @@ add_filter( 'template_include', 'bpeo_remove_default_canonical_event_content', 2
  * @see bpeo_remove_default_canonical_event_content()
  *
  * @param  string $content Current content.
- * @return string
+ * @return string $content The modified content.
  */
 function bpeo_canonical_event_content( $content ) {
 	global $pages;
+
+	// bail if not canonical event
+	if ( ! is_singular( 'event' ) ) {
+		return $content;
+	}
+
+	// bail if not event post type
+	if ( get_post_type( get_the_ID() ) != 'event' ) {
+		return $content;
+	}
 
 	// reset get_the_content() to use already-rendered content so we can use it in
 	// our content-eo-event.php template part
