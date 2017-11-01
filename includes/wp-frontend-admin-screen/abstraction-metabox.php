@@ -839,6 +839,35 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
 }
 endif;
 
+/** DUPLICATES - POST COMMENT STATUS ***********************************/
+if ( ! function_exists( 'post_comment_status_meta_box' ) ) :
+/**
+ * Display post comment status form fields. (E.g. "Allow comments")
+ *
+ * WFAS Mods:
+ *  - Removed "Allow pingbacks" checkbox
+ *
+ * @param object $post
+ */
+function post_comment_status_meta_box($post, $args = array() ) {
+?>
+	<p class="meta-options">
+		<label for="comment_status" class="selectit"><input name="comment_status" type="checkbox" id="comment_status" value="open" <?php checked($post->comment_status, 'open'); ?> /> <?php _e( 'Allow comments' ) ?></label>
+		<?php
+		/**
+		 * Fires at the end of the Discussion meta box on the post editing screen.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param WP_Post $post WP_Post object of the current post.
+		 */
+		do_action( 'post_comment_status_meta_box-options', $post );
+?>
+	</p>
+<?php
+}
+endif;
+
 /** DUPLICATES - POST SUBMIT META BOX ***********************************/
 
 if ( ! function_exists( 'post_submit_meta_box' ) ) :

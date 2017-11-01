@@ -632,6 +632,17 @@ function bpeo_render_silent_checkbox( $post_type, $location, $post ) {
 }
 add_action( 'do_meta_boxes', 'bpeo_render_silent_checkbox', 10, 3 );
 
+/**
+ * Override BP Core filter that sets comment_status to closed for all BP pages
+ */
+function bpeo_show_event_comments( $retval, $open, $post_id ) {
+	if ( $open && ! $retval && get_post_type( $post_id ) === 'event' ){
+		return true;
+	} else {
+		return $retval;
+	}
+}
+add_filter( 'bp_force_comment_status', 'bpeo_show_event_comments', 10, 3 );
 /** Embed ********************************************************************/
 
 /**

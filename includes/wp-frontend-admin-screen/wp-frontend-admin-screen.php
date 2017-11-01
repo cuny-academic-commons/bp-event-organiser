@@ -99,6 +99,7 @@ class WP_Frontend_Admin_Screen {
 			'last_edited_on'    => __( 'Last edited on %1$s at %2$s' ),
 			'button_publish'    => __( 'Publish' ),
 			'button_update'     => __( 'Update' ),
+			'comments_status'	=> __( 'Discussion' ),
 			'tag_delimiter'     => _x( ',', 'tag delimiter' ),
 			'featured_image'    => __( 'Featured Image' ),
 			'title_publish'     => __( 'Publish' ),
@@ -275,7 +276,6 @@ class WP_Frontend_Admin_Screen {
 	?>
 
 		<h2 class="admin-page-title"><?php esc_html_e( $title  ); ?></h2>
-
 		<div id="post-body">
 		<form id="post" method="post" action="" name="post">
 			<?php wp_nonce_field( 'update-post_' . $post->ID ); ?>
@@ -352,6 +352,9 @@ class WP_Frontend_Admin_Screen {
 
 		// publish metabox
 		add_meta_box( 'submitdiv', $this->strings['title_publish'], 'post_submit_meta_box', self::$post_type, 'side', 'low' );
+
+		// allow comments metabox
+		add_meta_box( 'commentstatusdiv', $this->strings['comments_status'], 'post_comment_status_meta_box', self::$post_type, 'side', 'low' );
 
 		// taxonomy metaboxes
 		foreach ( get_object_taxonomies( $post ) as $tax_name ) {

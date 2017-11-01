@@ -13,3 +13,8 @@
 	<?php endif; ?>
 
 	<?php bpeo_the_single_event_action_links(); ?>
+	
+	<!-- If comments are enabled, show them -->
+	<div class="comments-template">
+		<?php comments_template(); ?>
+	</div>	
