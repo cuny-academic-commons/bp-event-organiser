@@ -643,6 +643,7 @@ function bpeo_show_event_comments( $retval, $open, $post_id ) {
 	}
 }
 add_filter( 'bp_force_comment_status', 'bpeo_show_event_comments', 10, 3 );
+
 /** Embed ********************************************************************/
 
 /**

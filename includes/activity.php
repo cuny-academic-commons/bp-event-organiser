@@ -394,3 +394,307 @@ function bpeo_unhook_duplicate_removing_for_activity_template( $retval ) {
 	return $retval;
 }
 add_filter( 'bp_has_activities', 'bpeo_unhook_duplicate_removing_for_activity_template' );
+
+/** EVENT COMMENT SYNCHRONIZATION ****************************************/
+
+/**
+ * Syncs activity comments and posts them back as event comments.
+ *
+ * Note: This is only a one-way sync - activity comments -> event comment.
+ *
+ * For event comment -> activity comment, see {@link bp_activity_post_type_comment()}.
+ *
+ * @param int    $comment_id      The activity ID for the posted activity comment.
+ * @param array  $params          Parameters for the activity comment.
+ * @param object $parent_activity Parameters of the parent activity item (in this case, the event post).
+ */
+function bpeo_sync_add_from_activity_comment( $comment_id, $params, $parent_activity ) {
+	// if parent activity isn't a post type having the buddypress-activity support, stop now!
+	if ( ! bp_activity_type_supports( $parent_activity->type, 'post-type-comment-tracking' ) ) {
+		//return;
+	}
+
+	// Do not sync if the activity comment was marked as spam.
+	$activity = new BP_Activity_Activity( $comment_id );
+	if ( $activity->is_spam ) {
+		return;
+	}
+
+	// Get userdata.
+	if ( $params['user_id'] == bp_loggedin_user_id() ) {
+		$user = buddypress()->loggedin_user->userdata;
+	} else {
+		$user = bp_core_get_core_userdata( $params['user_id'] );
+	}
+
+	// Get associated post type and set default comment parent
+	$post_type      = bp_activity_post_type_get_tracking_arg( $parent_activity->type, 'post_type' );
+	$comment_parent = 0;
+
+	// See if a parent WP comment ID exists.
+	if ( ! empty( $params['parent_id'] ) && ! empty( $post_type ) ) {
+		$comment_parent = bp_activity_get_meta( $params['parent_id'], "bpeo_{$post_type}_comment_id" );
+	}
+
+	// Comment args.
+	$args = array(
+		'comment_post_ID'      => $parent_activity->secondary_item_id,
+		'comment_author'       => bp_core_get_user_displayname( $params['user_id'] ),
+		'comment_author_email' => $user->user_email,
+		'comment_author_url'   => bp_core_get_user_domain( $params['user_id'], $user->user_nicename, $user->user_login ),
+		'comment_content'      => $params['content'],
+		'comment_type'         => '',
+		'comment_parent'       => (int) $comment_parent,
+		'user_id'              => $params['user_id'],
+		'comment_approved'     => 1
+	);
+
+	// Prevent separate activity entry being made.
+	remove_action( 'comment_post', 'bp_activity_post_type_comment', 10 );
+
+	// Handle timestamps for the WP comment after we've switched to the blog.
+	$args['comment_date']     = current_time( 'mysql' );
+	$args['comment_date_gmt'] = current_time( 'mysql', 1 );
+
+	// Post the comment.
+	$post_comment_id = wp_insert_comment( $args );
+
+	// Add meta to comment.
+	add_comment_meta( $post_comment_id, 'bp_activity_comment_id', $comment_id );
+
+	// Add meta to activity comment.
+	if ( ! empty( $post_type ) ) {
+		bp_activity_update_meta( $comment_id, "bpeo_event_comment_id", $post_comment_id );
+	}
+
+	// Resave activity comment with WP comment permalink.
+	//
+	// in bp_events_activity_comment_permalink(), we change activity comment
+	// permalinks to use the post comment link
+	//
+	// @todo since this is done after AJAX posting, the activity comment permalink
+	// doesn't change on the front end until the next page refresh.
+	$resave_activity = new BP_Activity_Activity( $comment_id );
+	$resave_activity->primary_link = get_comment_link( $post_comment_id );
+
+	/**
+	 * Now that the activity id exists and the post comment was created, we don't need to update
+	 * the content of the comment as there are no chances it has evolved.
+	 */
+	remove_action( 'bp_activity_before_save', 'bpeo_sync_activity_edit_to_post_comment', 20 );
+
+	$resave_activity->save();
+
+	// Add the edit activity comment hook back.
+	add_action( 'bp_activity_before_save', 'bpeo_sync_activity_edit_to_post_comment', 20 );
+
+	// Add the comment hook back.
+	add_action( 'comment_post', 'bp_activity_post_type_comment', 10, 2 );
+
+	/**
+	 * Fires after activity comments have been synced and posted as event comments.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int    $comment_id      The activity ID for the posted activity comment.
+	 * @param array  $args            Array of args used for the comment syncing.
+	 * @param object $parent_activity Parameters of the event post parent activity item.
+	 * @param object $user            User data object for the event comment.
+	 */
+	do_action( 'bpeo_sync_add_from_activity_comment', $comment_id, $args, $parent_activity, $user );
+}
+add_action( 'bp_activity_comment_posted', 'bpeo_sync_add_from_activity_comment', 10, 3 );
+
+function bpeo_allow_event_activity_comments( $can_comment, $activity_type ) {
+	global $activities_template;
+	$activity = $activities_template->activity;
+	if ( $activity_type !== 'bpeo_create_event' ) {
+		return $can_comment;
+	} else if ( comments_open( $activity->secondary_item_id ) ) {
+		return true;
+	} else {
+		return $can_comment;
+	}
+}
+add_filter( 'bp_activity_can_comment', 'bpeo_allow_event_activity_comments', 10, 2 );
+
+/**
+ * Set up the tracking arguments for the 'post' post type.
+ * 
+ * @see bp_activity_get_post_type_tracking_args() for information on parameters.
+ *
+ * @param object|null $params    Tracking arguments.
+ * @param string|int  $post_type Post type to track.
+ * @return object|null
+ */
+function bp_events_register_post_tracking_args( $params = null, $post_type = 0 ) {
+	if ( $post_type !== 'event' || $post_type !== 'bpeo_create_event' )
+		return $params;
+
+	// Set specific params for the 'event' post type.
+	$params->component_id    = 'bpeo';
+	$params->action_id       = 'new_event';
+	$params->admin_filter    = __( 'New event created', 'buddypress' );
+	$params->contexts        = array( 'activity', 'member' );
+	$params->position		 = 5;
+
+	if ( post_type_supports( $post_type, 'comments' ) ) {
+		$params->comment_action_id = 'new_event_comment';
+		$params->comments_tracking = new stdClass();
+		$params->comments_tracking->component_id    = 'bpeo';
+		$params->comments_tracking->action_id       = 'new_event_comment';
+		$params->comments_tracking->admin_filter    = __( 'New event comment posted', 'buddypress' );
+		$params->comments_tracking->front_filter    = __( 'Comments', 'buddypress' );
+		$params->comments_tracking->contexts        = array( 'activity', 'member' );
+		$params->comments_tracking->position        = 10;
+	}
+
+	return $params;
+}
+add_filter( 'bp_activity_get_post_type_tracking_args', 'bp_events_register_post_tracking_args', 10, 2 );
+
+/**
+ * Deletes the event comment when the associated activity comment is deleted.
+ *
+ * Note: This is hooked on the 'bp_activity_delete_comment_pre' filter instead
+ * of the 'bp_activity_delete_comment' action because we need to fetch the
+ * activity comment children before they are deleted.
+ *
+ *
+ * @param bool $retval             Whether BuddyPress should continue or not.
+ * @param int  $parent_activity_id The parent activity ID for the activity comment.
+ * @param int  $activity_id        The activity ID for the pending deleted activity comment.
+ * @param bool $deleted            Whether the comment was deleted or not.
+ * @return bool
+ */
+function bpeo_sync_delete_from_activity_comment( $retval, $parent_activity_id, $activity_id, &$deleted ) {
+	$parent_activity = new BP_Activity_Activity( $parent_activity_id );
+
+	// if parent activity isn't a post type having the buddypress-activity support, stop now!
+	if ( ! bp_activity_type_supports( $parent_activity->type, 'post-type-comment-tracking' ) ) {
+		//return $retval;
+	}
+
+	// Fetch the activity comments for the activity item.
+	$activity = bp_activity_get( array(
+		'in'               => $activity_id,
+		'display_comments' => 'stream',
+		'spam'             => 'all',
+	) );
+
+	// Get all activity comment IDs for the pending deleted item.
+	$activity_ids   = bp_activity_recurse_comments_activity_ids( $activity );
+	$activity_ids[] = $activity_id;
+
+	// Remove associated event comments.
+	bpeo_remove_associated_event_comments( $activity_ids, current_user_can( 'moderate_comments' ) );
+
+	// Rebuild activity comment tree
+	// emulate bp_activity_delete_comment().
+	BP_Activity_Activity::rebuild_activity_comment_tree( $parent_activity_id );
+
+	// Avoid the error message although the comments were successfully deleted
+	$deleted = true;
+
+	// We're overriding the default bp_activity_delete_comment() functionality
+	// so we need to return false.
+	return false;
+}
+add_filter( 'bp_activity_delete_comment_pre', 'bpeo_sync_delete_from_activity_comment', 10, 4 );
+
+/**
+ * Updates the event comment when the associated activity comment is edited.
+ *
+ *
+ * @param BP_Activity_Activity $activity The activity object.
+ */
+function bp_blogs_sync_activity_edit_to_event_comment( BP_Activity_Activity $activity ) {
+	// This is a new entry, so stop!
+	// We only want edits!
+	if ( empty( $activity->id ) ) {
+		return;
+	}
+
+	// fetch parent activity item
+	$parent_activity = new BP_Activity_Activity( $activity->item_id );
+
+	// if parent activity isn't a post type having the buddypress-activity support for comments, stop now!
+	if ( ! bp_activity_type_supports( $parent_activity->type, 'post-type-comment-tracking' ) ) {
+		//return;
+	}
+
+	$post_type = bp_activity_post_type_get_tracking_arg( $parent_activity->type, 'post_type' );
+
+	// No associated post type for this activity comment, stop.
+	if ( ! $post_type ) {
+		return;
+	}
+
+	// Try to see if a corresponding blog comment exists.
+	$post_comment_id = bp_activity_get_meta( $activity->id, "bpeo_event_comment_id" );
+
+	if ( empty( $post_comment_id ) ) {
+		return;
+	}
+
+	// Get the comment status
+	$post_comment_status = wp_get_comment_status( $post_comment_id );
+	$old_comment_status  = $post_comment_status;
+
+	// No need to edit the activity, as it's the activity who's updating the comment
+	remove_action( 'transition_comment_status', 'bp_activity_transition_post_type_comment_status', 10 );
+	remove_action( 'bp_activity_post_type_comment', 'bpeo_comment_sync_activity_comment', 10 );
+
+	if ( 1 === $activity->is_spam && 'spam' !== $post_comment_status ) {
+		wp_spam_comment( $post_comment_id );
+	} elseif ( ! $activity->is_spam ) {
+		if ( 'spam' === $post_comment_status  ) {
+			wp_unspam_comment( $post_comment_id );
+		} elseif ( 'trash' === $post_comment_status ) {
+			wp_untrash_comment( $post_comment_id );
+		} else {
+			// Update the blog post comment.
+			wp_update_comment( array(
+				'comment_ID'       => $post_comment_id,
+				'comment_content'  => $activity->content,
+			) );
+		}
+	}
+
+	// Restore actions
+	add_action( 'transition_comment_status',     'bp_activity_transition_post_type_comment_status', 10, 3 );
+	add_action( 'bp_activity_post_type_comment', 'bpeo_comment_sync_activity_comment',          10, 4 );
+}
+add_action( 'bp_activity_before_save', 'bpeo_sync_activity_edit_to_event_comment', 20 );
+
+/**
+ * When an event is trashed, remove each comment's associated activity meta.
+ *
+ * When an event is trashed and later untrashed, we currently don't reinstate
+ * activity items for these comments since their activity entries are already
+ * deleted when initially trashed.
+ *
+ * Since these activity entries are deleted, we need to remove the deleted
+ * activity comment IDs from each comment's meta when an event is trashed.
+ *
+ *
+ * @param int   $post_id  The post ID of the event.
+ * @param array $comments Array of comment statuses. The key is comment ID, the
+ *                        value is the $comment->comment_approved value.
+ */
+function bp_blogs_remove_activity_meta_for_trashed_comments( $post_id = 0, $comments = array() ) {
+	if ( ! empty( $comments ) && get_post_type( $post_id ) === 'event' ) {
+		foreach ( array_keys( $comments ) as $comment_id ) {
+			delete_comment_meta( $comment_id, 'bp_activity_comment_id' );
+		}
+	}
+}
+add_action( 'trashed_post_comments', 'bpeo_remove_activity_meta_for_trashed_comments', 10, 2 );
+
+function bpeotest() {
+	global $wpdb;
+	$i = 8;
+	var_dump($wpdb);
+	exit;
+}
+//add_action( 'init', 'bpeotest' );

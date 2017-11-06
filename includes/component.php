@@ -28,6 +28,8 @@ class BPEO_Component extends BP_Component {
 			'slug' => bpeo_get_events_slug(),
 			'has_directory' => false,
 		) );
+
+		add_post_type_support( 'event', 'buddypress-activity' );
 	}
 
 	/**

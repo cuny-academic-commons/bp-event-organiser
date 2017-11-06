@@ -818,3 +818,39 @@ function bpeo_filter_ajax_query_attachments( $retval ) {
 	return $retval;
 }
 add_filter( 'ajax_query_attachments_args', 'bpeo_filter_ajax_query_attachments' );
+
+/**
+ * Removes event comments that are associated with activity comments.
+ *
+ * @param array $activity_ids The activity IDs to check association with event
+ *                            comments.
+ * @param bool  $force_delete  Whether to force delete the comments. If false,
+ *                            comments are trashed instead.
+ */
+function bpeo_remove_associated_event_comments( $activity_ids = array(), $force_delete = true ) {
+	// Query args.
+	$query_args = array(
+		'meta_query' => array(
+			array(
+				'key'     => 'bp_activity_comment_id',
+				'value'   => implode( ',', (array) $activity_ids ),
+				'compare' => 'IN',
+			)
+		)
+	);
+
+	// Get comment.
+	$comment_query = new WP_Comment_Query;
+	$comments = $comment_query->query( $query_args );
+
+	// Found the corresponding comments
+	// let's delete them!
+	foreach ( $comments as $comment ) {
+		wp_delete_comment( $comment->comment_ID, $force_delete );
+
+		// If we're trashing the comment, remove the meta key as well.
+		if ( empty( $force_delete ) ) {
+			delete_comment_meta( $comment->comment_ID, 'bp_activity_comment_id' );
+		}
+	}
+}
