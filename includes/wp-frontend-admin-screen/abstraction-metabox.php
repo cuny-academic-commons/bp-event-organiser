@@ -779,6 +779,33 @@ function get_terms_to_edit( $post_id, $taxonomy = 'post_tag' ) {
 }
 endif;
 
+/** DUPLICATES - AUTHOR META BOX *************************************/
+
+if ( ! function_exists( 'post_author_meta_box' ) ) :
+/**
+ * Display form field with list of authors.
+ *
+ * @since 2.6.0
+ *
+ * @global int $user_ID
+ *
+ * @param object $post
+ */
+function post_author_meta_box($post) {
+	global $user_ID;
+?>
+<label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
+<?php
+	wp_dropdown_users( array(
+		'who' => 'authors',
+		'name' => 'post_author_override',
+		'selected' => empty($post->ID) ? $user_ID : $post->post_author,
+		'include_selected' => true,
+		'show' => 'display_name_with_login',
+	) );
+}
+endif;
+
 /** DUPLICATES - THUMBNAIL META BOX *************************************/
 
 if ( ! function_exists( 'post_thumbnail_meta_box' ) ) :
