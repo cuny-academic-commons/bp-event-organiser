@@ -230,17 +230,17 @@ function bpeo_do_ical_download( $r = array() ) {
 	// Override iCalendar name
 	$name = esc_attr( $r['name'] );
 	if ( ! empty( $name ) ) {
-		add_filter( 'pre_option_blogname', create_function( '', "
-			return '" . $name . "';
-		" ) );
+		add_filter( 'pre_option_blogname', function( $retval ) use ( $name ) {
+			return $name;
+		} );
 	}
 
 	// Override iCalendar URL
 	$url = esc_url( $r['url'] );
 	if ( ! empty( $url ) ) {
-		add_filter( 'post_type_archive_link', create_function( '', "
-			return '" . $url . "';
-		" ) );
+		add_filter( 'post_type_archive_link', function( $retval ) use ( $url ) {
+			return $url;
+		} );
 	}
 
 	// Do our query.

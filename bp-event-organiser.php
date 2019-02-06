@@ -2,11 +2,9 @@
 /*
 --------------------------------------------------------------------------------
 Plugin Name: BuddyPress Event Organiser
-Description: A WordPress plugin for assigning Event Organiser plugin Events to BuddyPress Groups and Group Hierarchies
-Version: 0.2
-Author: Christian Wach
-Author URI: http://haystack.co.uk
-Plugin URI: http://haystack.co.uk
+Description: Add BuddyPress support for the Event Organiser plugin.
+Version: 1.1.0
+Author: CUNY Academic Commons
 --------------------------------------------------------------------------------
 */
 
