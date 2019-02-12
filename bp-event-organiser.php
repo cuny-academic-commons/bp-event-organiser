@@ -14,7 +14,7 @@ Author: CUNY Academic Commons
 define( 'BUDDYPRESS_EVENT_ORGANISER_DEBUG', false );
 
 // set our version here
-define( 'BUDDYPRESS_EVENT_ORGANISER_VERSION', '0.2' );
+define( 'BUDDYPRESS_EVENT_ORGANISER_VERSION', '1.1.0' );
 
 // store reference to this file
 if ( !defined( 'BUDDYPRESS_EVENT_ORGANISER_FILE' ) ) {

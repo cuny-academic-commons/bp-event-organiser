@@ -3,7 +3,7 @@ Contributors: cuny-academic-commons, r-a-y, boonebgorges, needle
 Tags: buddypress, event, organiser, groups
 Requires at least: 3.6
 Tested up to: 5.0.3
-Stable tag: 0.2
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
