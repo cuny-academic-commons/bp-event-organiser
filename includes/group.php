@@ -998,7 +998,14 @@ function bpeo_ges_add_ical_link( $content, $activity ) {
 		return $content;
 	}
 
-	$ical_link = __( 'Download iCalendar file:', 'bp-event-organiser' );
+	$ical_link = '';
+
+	// Add spacing in email for BuddyPress 3.0+.
+	if ( function_exists( 'bp_check_theme_template_pack_dependency' ) ) {
+		$ical_link .= "\n\n";
+	}
+
+	$ical_link .= __( 'Download iCalendar file:', 'bp-event-organiser' );
 	$ical_link .= "\n";
 
 	if ( ! empty( $activity->hide_sidewide ) ) {
