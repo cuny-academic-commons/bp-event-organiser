@@ -1017,3 +1017,55 @@ function bpeo_ges_add_ical_link( $content, $activity ) {
 	return $content . $ical_link;
 }
 add_filter( 'bp_ass_activity_notification_content', 'bpeo_ges_add_ical_link', 20, 2 );
+
+/**
+ * Conditionally sets up the PHPMailer callback for adding the .ics attachment to BPGES emails.
+ */
+function bpeo_maybe_hook_ics_attachments( $args, $email_type ) {
+	if ( 'bp-ges-single' !== $email_type ) {
+		return $args;
+	}
+
+	if ( empty( $args['activity'] ) ) {
+		return $args;
+	}
+
+	if ( 'bpeo_create_event' !== $args['activity']->type && 'bpeo_edit_event' !== $args['activity']->type ) {
+		return $args;
+	}
+
+	$ical_link = bpeo_get_the_ical_link( $args['activity']->secondary_item_id );
+
+	$request = wp_remote_get(
+		$ical_link,
+		array(
+			'cookies' => $_COOKIE,
+		)
+	);
+
+	if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+		return;
+	}
+
+	$GLOBALS['bpeo_event_ical'] = wp_remote_retrieve_body( $request );
+
+	add_action( 'phpmailer_init', 'bpeo_attach_ical_to_bpges_notification' );
+
+	return $args;
+}
+add_action( 'ass_send_email_args', 'bpeo_maybe_hook_ics_attachments', 10, 2 );
+
+/**
+ * Sets up ical attachment to outgoing emails.
+ *
+ * @param PHPMailer $phpmailer
+ */
+function bpeo_attach_ical_to_bpges_notification( $phpmailer ) {
+	global $bpeo_event_ical;
+
+	if ( empty( $bpeo_event_ical ) ) {
+		return;
+	}
+
+	$phpmailer->addStringAttachment( $bpeo_event_ical, 'basic.ics' );
+}
