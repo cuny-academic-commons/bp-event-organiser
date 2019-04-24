@@ -41,22 +41,34 @@ function bpeo_create_activity_for_event( $event_id, $event = null, $update = nul
 	if ( 'bpeo_create_event' === $type ) {
 		$content_parts = array();
 
-		$content_parts[] = sprintf( __( 'Title: %s', 'bp-event-organiser' ), $event->post_title );
+		$content_parts['title'] = sprintf( __( 'Title: %s', 'bp-event-organiser' ), $event->post_title );
+
+		$content_parts['description'] = sprintf( __( 'Description: %s', 'bp-event-organiser' ), $event->post_content );
 
 		$date = eo_get_next_occurrence( eo_get_event_datetime_format( $event_id ), $event_id );
 		if ( $date ) {
-			$content_parts[] = sprintf( __( 'Date: %s', 'bp-event-organiser' ), esc_html( $date ) );
+			$dateTime = new DateTime();
+			$dateTime->setTimeZone( new DateTimeZone( eo_get_blog_timezone()->getName() ) );
+
+			$event_timezone = $dateTime->format('T');
+			$content_parts['date'] = sprintf( __( 'Date: %s %s', 'bp-event-organiser' ), esc_html( $date ), esc_html( $event_timezone ) );
 		}
 
 		$venue_id = eo_get_venue( $event_id );
 		if ( $venue_id ) {
 			$venue = eo_get_venue_name( $venue_id );
-			$content_parts[] = sprintf( __( 'Location: %s', 'bp-event-organiser' ), esc_html( $venue ) );
+			$content_parts['location'] = sprintf( __( 'Location: %s', 'bp-event-organiser' ), esc_html( $venue ) );
 		}
+
+		/**
+		 * Filters the parts of the activity content for BPEO activity items.
+		 *
+		 * @param array
+		 */
+		apply_filters( 'bpeo_activity_content_parts', $content_parts );
 
 		$content = implode( "\n\r", $content_parts );
 	}
-
 
 	// Existing activity items for this event.
 	$activities = bpeo_get_activity_by_event_id( $event_id );
