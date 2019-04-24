@@ -65,7 +65,7 @@ function bpeo_create_activity_for_event( $event_id, $event = null, $update = nul
 		 *
 		 * @param array
 		 */
-		apply_filters( 'bpeo_activity_content_parts', $content_parts );
+		$content_parts = apply_filters( 'bpeo_activity_content_parts', $content_parts );
 
 		$content = implode( "\n\r", $content_parts );
 	}
