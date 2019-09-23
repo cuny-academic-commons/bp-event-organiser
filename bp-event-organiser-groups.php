@@ -79,6 +79,9 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		$slug = apply_filters( 'bpeo_extension_slug', bpeo_get_events_slug() );
 		$pos = apply_filters( 'bpeo_extension_pos', 31 );
 
+		// Allow direct access to private group iCals.
+		add_filter( 'bp_group_user_has_access', array( $this, 'ical_allow_public_access' ) );
+
 		// test for BP 1.8+
 		// could also use 'bp_esc_sql_order' (the other core addition)
 		if ( function_exists( 'bp_core_get_upload_dir' ) ) {
@@ -545,6 +548,22 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		// iCal time!
 		bpeo_do_ical_download( $args );
+	}
+
+	/**
+	 * Allows direct access to private group iCals.
+	 */
+	public function ical_allow_public_access( $retval ) {
+		if ( true === $retval || is_user_logged_in() ) {
+			return $retval;
+		}
+
+		if ( bp_is_current_action( bpeo_get_events_slug() ) && bp_is_action_variable( 'ical' ) && true === ctype_xdigit( bp_action_variable( 0 ) ) ) {
+			$this->ical_action();
+			die();
+		}
+
+		return $retval;
 	}
 
 	/**
