@@ -560,6 +560,10 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		if ( bp_is_current_action( bpeo_get_events_slug() ) && bp_is_action_variable( 'ical' ) && true === ctype_xdigit( bp_action_variable( 0 ) ) ) {
 			$this->ical_action();
+
+			/** This filter is documented in /wp-includes/template-loader.php */
+			$template = apply_filters( 'template_include', get_404_template() );
+			include( $template );
 			die();
 		}
 
