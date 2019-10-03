@@ -228,7 +228,9 @@ class BuddyPress_Event_Organiser {
 	public function enqueue_styles() {
 		wp_enqueue_style(
 			'bp_event_organiser_css',
-			BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/css/bp-event-organiser.css'
+			BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/css/bp-event-organiser.css',
+			array(),
+			'20191002'
 		);
 	}
 
