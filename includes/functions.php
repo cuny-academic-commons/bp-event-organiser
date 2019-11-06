@@ -726,7 +726,6 @@ function bpeo_get_item_calendar_color( $item_id, $item_type ) {
 			break;
 
 		case 'author' :
-		default :
 			$color = bp_get_user_meta( $item_id, 'bpeo_calendar_color', true );
 			break;
 	}
@@ -767,7 +766,6 @@ function bpeo_get_item_calendar_color( $item_id, $item_type ) {
 				break;
 
 			case 'author' :
-			default :
 				bp_update_user_meta( $item_id, 'bpeo_calendar_color', $color );
 				break;
 		}
