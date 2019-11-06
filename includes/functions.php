@@ -180,7 +180,16 @@ function bpeo_the_filter_title() {
 		} elseif ( ! empty( $tag ) ) {
 			return sprintf( __( "Filtered by tag '%s'", 'bp-event-organiser' ), $tag );
 		} else {
-			return '';
+			/**
+			 * Allow developers to set a filter title when blank.
+			 *
+			 * @since 1.1.0
+			 *
+			 * @param string $title.
+			 */
+			$title = apply_filters( 'bpeo_get_the_filter_title', '' );
+
+			return esc_html( $title );
 		}
 	}
 
