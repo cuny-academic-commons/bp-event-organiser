@@ -50,7 +50,8 @@ class BPEO_Group_Ical_Sync {
 
 		// Remove EO's default cronjob. We're going to roll our own per group.
 		remove_action( 'eventorganiser_ical_feed_sync', 'eo_fetch_feeds' );
-		add_action( 'bpeo_group_ical_sync', array( $this, 'sync' ) );
+		add_action( 'bpeo_group_ical_sync',   array( $this, 'sync' ) );
+		add_action( 'bp_groups_delete_group', array( $this, 'delete_cron_on_group_delete' ) );
 	}
 
 	/* MANAGE > EVENTS PAGE *************************************************/
@@ -205,6 +206,20 @@ class BPEO_Group_Ical_Sync {
 		}
 
 		die();
+	}
+
+	/**
+	 * Removes iCalendar cron job for the group on group deletion.
+	 *
+	 * @param BP_Groups_Group $group Group being deleted.
+	 */
+	public function delete_cron_on_group_delete( $group ) {
+		$schedule_args = array( $group->id );
+
+		$next = wp_next_scheduled( 'bpeo_group_ical_sync', $schedule_args );
+		if ( false !== $next ) {
+			wp_unschedule_event( $next, 'bpeo_group_ical_sync', $schedule_args );
+		}
 	}
 
 	/** SAVE HOOKS **********************************************************/
