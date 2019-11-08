@@ -93,8 +93,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'enable_create_step' => false,
 			);
 
-			// Only register the "Manage > Events" screen for non-public groups.
-			if ( bp_is_group() && 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			// Register the "Manage > Events" screen.
+			if ( bp_is_group() ) {
 				$args['screens'] = array(
 					'edit' => array(
 						'enabled' => true,
@@ -174,19 +174,15 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'link'            => bpeo_get_group_permalink() . 'upcoming/',
 		), $default_params );
 
-		// Show 'Manage' tab if group is not public
-		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
-			// We only allow group admins to see this tab
-			$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
-
-			$sub_nav[] = array_merge( array(
-				'name'            => __( 'Manage', 'bp-event-organiser' ),
-				'slug'            => 'manage',
-				'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
-				'position'        => 0,
-				'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
-			), $default_params );
-		}
+		// We only allow group admins to see the Manage tab
+		$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
+		$sub_nav[] = array_merge( array(
+			'name'            => __( 'Manage', 'bp-event-organiser' ),
+			'slug'            => 'manage',
+			'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
+			'position'        => 0,
+			'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
+		), $default_params );
 
 		// @todo This should probably use a custom cap instead of membership check.
 		$sub_nav[] = array_merge( array(
