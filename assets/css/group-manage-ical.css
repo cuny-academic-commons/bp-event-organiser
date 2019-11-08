@@ -1,10 +1,10 @@
-body.bp-legacy div.manage-icalendar h3 {
+body.bp-legacy #buddypress div.manage-icalendar h3 {
 	background: #555;
 	color: #fff;
 	padding: 0.2em;
 }
 
-body.bp-nouveau div.manage-icalendar h3 {
+div.manage-icalendar {
 	margin-top: 2em;
 }
 
@@ -27,14 +27,20 @@ div.manage-icalendar .widefat th {
 	padding: 8px 10px;
 }
 
-.eo-advanced-feed-options-toggle,
-div.manage-icalendar-ics label {
+.eo-advanced-feed-options-toggle {
 	display: inline-block;
 }
 
-.eo-advanced-feed-options-toggle,
-#eo-advanced-feed-options-wrap {
-	margin-bottom: 2em;
+div.manage-icalendar-ics label {
+	display: block;
+}
+
+div.manage-icalendar-feeds .hide-if-js {
+	display: none;
+}
+
+#add-eo-feed-submit {
+	margin-top: 2em;
 }
 
 div.manage-icalendar-ics label {
