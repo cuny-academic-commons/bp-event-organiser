@@ -618,6 +618,16 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 			// remove our template stack
 			remove_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+
+		/*
+		 * Public group, so add dummy submit button.
+		 *
+		 * The BP Group Extension API adds a submit button by default if one doesn't
+		 * exist. We don't need a submit button because the Import ICS section uses
+		 * a custom form. So to bypass this, we add a hidden submit button.
+		 */
+		} else {
+			echo '<input type="submit" style="display:none" />';
 		}
 	}
 
