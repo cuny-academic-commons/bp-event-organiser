@@ -12,8 +12,6 @@ class BPEO_Group_Ical_Sync {
 	 * @since 1.1.0
 	 */
 	public function __construct() {
-		add_filter( 'bpeo_group_show_group_manage_nav', '__return_true' );
-
 		// "Manage > Events" page.
 		add_action( 'bp_actions', array( $this, 'manage_events_ical_feeds' ), 7 );
 
