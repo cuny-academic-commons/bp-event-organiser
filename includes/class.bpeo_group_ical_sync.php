@@ -33,7 +33,7 @@ class BPEO_Group_Ical_Sync {
 		add_filter( 'eventorganiser_event_color',           array( $this, 'fullcalendar_feed_background_color' ), 10, 2 );
 		add_filter( 'bpeo_get_the_filter_title',            array( $this, 'filter_filter_title' ) );
 		add_action( 'eventorganiser_additional_event_meta', array( $this, 'show_external_feed_data_in_event' ), 40 );
- 
+
 		// Tomfoolery! Save querystring from current URI for AJAX purposes!
 		add_filter( 'bp_uri', function( $retval ) {
 			if ( ! defined( 'DOING_AJAX' ) ) {
@@ -72,22 +72,22 @@ class BPEO_Group_Ical_Sync {
 		// Feed schedule validation routine.
 		if ( ! empty( $_POST['action'] ) && 'eventorganier-update-feed-settings' === $_POST['action'] ) {
 			check_admin_referer( 'eventorganier-update-feed-settings' );
-	
+
 			$schedule = $_POST['eventorganiser_feed_schedule'];
 			$current_schedule = groups_get_groupmeta( bp_get_current_group_id(), 'eventorganiser_feed_schedule' );
-	
+
 			if ( $schedule != $current_schedule ) {
 				$schedule_args = array( bp_get_current_group_id() );
-	
+
 				// Unschedule current cronjob for the group.
 				$next = wp_next_scheduled( 'bpeo_group_ical_sync', $schedule_args );
 				if ( false !== $next ) {
 					wp_unschedule_event( $next, 'bpeo_group_ical_sync', $schedule_args );
 				}
-	
+
 				// Update custom schedule marker.
 				groups_update_groupmeta( bp_get_current_group_id(), 'eventorganiser_feed_schedule', $schedule );
-	
+
 				// Add new cronjob for group.
 				if ( ! empty( $schedule ) ) {
 					$schedules = wp_get_schedules();
@@ -95,7 +95,7 @@ class BPEO_Group_Ical_Sync {
 					wp_schedule_event( $timestamp, $schedule, 'bpeo_group_ical_sync', $schedule_args );
 				}
 			}
-	
+
 			bp_core_add_message( __( 'Feed sync settings updated', 'bp-event-organiser' ) );
 			bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->get_events_slug() . '/' );
 		}
@@ -196,14 +196,14 @@ class BPEO_Group_Ical_Sync {
 			'meta_key'   => '_eventorganiser_feed_group_id',
 			'meta_value' => $group_id
 		) );
-	
+
 		if ( $feeds ) {
 			foreach ( $feeds as $feed_id ) {
 				set_time_limit( 600 );
 				eo_fetch_feed( $feed_id );
 			}
 		}
-	
+
 		die();
 	}
 
@@ -227,8 +227,6 @@ class BPEO_Group_Ical_Sync {
 		// @todo Make this customizable?
 		update_post_meta( $post_id, '_eventorganiser_feed_color', bpeo_get_item_calendar_color( $feed_id, 'feed' ) );
 	}
-
-
 
 	public function add_group_to_synced_event( $event_id, $event, $feed_id ) {
 		$group_id = (int) get_post_meta( $feed_id, '_eventorganiser_feed_group_id', true );
@@ -360,7 +358,7 @@ class BPEO_Group_Ical_Sync {
 	public function pass_manage_options_cap( $caps, $cap, $user_id, $args ) {
 		if ( ! is_user_logged_in() || 'manage_options' !== $cap ) {
 			return $caps;
-		}		
+		}
 
 		return array( 'exist' );
 	}
