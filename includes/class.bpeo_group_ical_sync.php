@@ -24,6 +24,8 @@ class BPEO_Group_Ical_Sync {
 
 		// EO hooks to save our custom BP meta.
 		add_action( 'added_post_meta',                         array( $this, 'save_group_id_to_feed' ), 10, 3 );
+		add_filter( 'eventorganiser_ical_sync_meta_key_map',   array( $this, 'disable_term_saving' ) );
+		add_action( 'eventorganiser_ical_sync_event_updated',  array( $this, 'reenable_term_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_inserted', array( $this, 'add_group_to_synced_event' ), 10, 3 );
 
 		// EO hooks to display our iCal data.
@@ -248,6 +250,9 @@ class BPEO_Group_Ical_Sync {
 				'post_status' => 'private'
 			) );
 		}
+
+		// Re-enable term saving.
+		$this->reenable_term_saving();
 	}
 
 	/**
@@ -265,21 +270,20 @@ class BPEO_Group_Ical_Sync {
 			return;
 		}
 
-		// Disable event category syncing if turned off.
-		if ( true !== bpeo_is_import_categories_enabled() ) {
-			unset( $_POST['feed-category'] );
-		}
-
-		// Disable event venue syncing if turned off.
-		if ( true !== bpeo_is_import_venues_enabled() ) {
-			unset( $_POST['feed-venue'] );
-		}
-
 		// Bypass 'manage_options' capability so we can save our settings.
 		add_filter( 'map_meta_cap', array( $this, 'pass_manage_options_cap' ), 10, 4 );
 
 		// Change some strings.
 		add_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
+	}
+
+	public function disable_term_saving( $retval ) {
+		add_filter( 'pre_insert_term', array( $this, 'block_term_saving' ), 10, 2 );
+		return $retval;
+	}
+
+	public function reenable_term_saving() {
+		remove_filter( 'pre_insert_term', array( $this, 'block_term_saving' ), 10 );
 	}
 
 	/* DISPLAY HOOKS ********************************************************/
@@ -359,6 +363,18 @@ class BPEO_Group_Ical_Sync {
 		}		
 
 		return array( 'exist' );
+	}
+
+	public function block_term_saving( $retval, $taxonomy ) {
+		if ( true !== bpeo_is_import_venues_enabled() && 'event-venue' === $taxonomy ) {
+			return new WP_Error( 'term_disabled', __( 'Event venues are disabled', 'bp-event-organiser' ) );
+		}
+
+		if ( true !== bpeo_is_import_categories_enabled() && 'event-category' === $taxonomy ) {
+			return new WP_Error( 'term_disabled', __( 'Event categories are disabled', 'bp-event-organiser' ) );
+		}
+
+		return $retval;
 	}
 
 	public function gettext_overrides( $translated_text, $untranslated_text, $domain ) {
