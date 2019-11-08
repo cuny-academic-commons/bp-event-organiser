@@ -839,3 +839,46 @@ function bpeo_filter_ajax_query_attachments( $retval ) {
 	return $retval;
 }
 add_filter( 'ajax_query_attachments_args', 'bpeo_filter_ajax_query_attachments' );
+
+
+/** Import ICS ***************************************************************/
+
+/**
+ * See if categories can be imported from an ICS file.
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_categories_enabled() {
+	/**
+	 * Filter to toggle if categories can be imported from an ICS file.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: true
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_categories', true );
+
+	return $retval;
+}
+
+/**
+ * See if venues can be imported from an ICS file.
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_venues_enabled() {
+	/**
+	 * Filter to toggle if venues can be imported from an ICS file.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: true
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_venues', true );
+
+	return $retval;
+}
