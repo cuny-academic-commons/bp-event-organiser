@@ -1,0 +1,64 @@
+body.bp-legacy div.manage-icalendar h3 {
+	background: #555;
+	color: #fff;
+	padding: 0.2em;
+}
+
+body.bp-nouveau div.manage-icalendar h3 {
+	margin-top: 2em;
+}
+
+div.manage-icalendar .widefat a {
+	font-size: 95%;
+	text-decoration: none;
+}
+
+div.manage-icalendar .row-actions .delete a:hover {
+	color: #dc3232;
+	border: none;
+}
+
+div.manage-icalendar .row-actions span.delete a {
+	color: #a00;
+}
+
+div.manage-icalendar .widefat td,
+div.manage-icalendar .widefat th {
+	padding: 8px 10px;
+}
+
+.eo-advanced-feed-options-toggle,
+div.manage-icalendar-ics label {
+	display: inline-block;
+}
+
+.eo-advanced-feed-options-toggle,
+#eo-advanced-feed-options-wrap {
+	margin-bottom: 2em;
+}
+
+div.manage-icalendar-ics label {
+	margin-bottom: 1em;
+}
+
+/* hide some post statuses that are not applicable to us */
+div.manage-icalendar #feed-status option[value="draft"],
+div.manage-icalendar #feed-status option[value="pending"] {
+	display: none;
+}
+
+/* hide categories if we've disabled them */
+div.disable-eo-categories label[for="feed-category"],
+div.disable-eo-categories #feed-category,
+div.disable-eo-categories .inline-edit-col label:nth-child(5) {
+	/* nth-child(5) is such a hack... */
+	display: none;
+}
+
+/* hide venues if we've disabled them */
+div.disable-eo-venues label[for="feed-venue"],
+div.disable-eo-venues #feed-venue,
+div.disable-eo-venues .inline-edit-col label:nth-child(6) {
+	/* nth-child(6) is such a hack... */
+	display: none;
+}

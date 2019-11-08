@@ -828,3 +828,14 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 // register our class
 bp_register_group_extension( 'BP_Event_Organiser_Group_Extension' );
+
+// Load our group iCal sync module if necessary.
+add_action( 'bp_init', function() {
+	if ( ! class_exists( 'EO_Sync_Ical' ) || ! bp_is_root_blog() ) {
+		return;
+	}
+
+	require_once BPEO_PATH . 'includes/class.bpeo_group_ical_sync.php';
+
+	$GLOBALS['buddypress_event_organiser']->group_ical_sync = new BPEO_Group_Ical_Sync;
+}, 0 );
