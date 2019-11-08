@@ -709,7 +709,6 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		// Check for validation message and remove some filters.
 		if ( isset( buddypress()->template_message ) ) {
-			remove_filter( 'bp_core_render_message_content', 'wpautop' );
 			remove_filter( 'bp_core_render_message_content', 'wp_kses_data', 5 );
 		}
 
