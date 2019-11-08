@@ -151,6 +151,15 @@ class BPEO_Group_Ical_Sync {
 		// Some markup adjustments.
 		$contents = str_replace( '&lt;br/&gt;', '<br />', $contents );
 
+		/**
+		 * Filters the markup from EO's iCal feeds form.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param string $contents HTML markup.
+		 */
+		$contents = apply_filters( 'bpeo_display_ical_feeds_contents', $contents );
+
 		// Container classes.
 		$classes = array( 'manage-icalendar', 'manage-icalendar-feeds' );
 		if ( true !== bpeo_is_import_categories_enabled() ) {
