@@ -678,11 +678,15 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 					// Bypass permission checks for event creation.
 					add_filter( 'map_meta_cap', array( $this, 'bypass_permission_checks' ), 10, 4 );
 
+					// Prevent activity items from being generated.
+					add_action( 'bp_activity_before_save', array( $this, 'block_activity_saving' ), 0 );
+
 					// Import the iCalendar file.
 					$import = Event_Organiser_Im_Export::get_object();
 					$import->import_file( $_FILES['ics']['tmp_name'] );
 
-					remove_filter( 'map_meta_cap', array( $this, 'bypass_permission_checks' ), 10 );
+					remove_filter( 'map_meta_cap',            array( $this, 'bypass_permission_checks' ), 10 );
+					remove_action( 'bp_activity_before_save', array( $this, 'block_activity_saving' ), 0 );
 				}
 
 			} elseif ( ! isset( $_FILES ) || empty( $_FILES['ics']['name'] ) ) {
@@ -787,6 +791,20 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'post_status' => 'private'
 			) );
 		}
+	}
+
+	/**
+	 * Block activity items from being created.
+	 *
+	 * To block activity items, we wipe out the activity's component property.
+	 * BuddyPress will then prevent the item from being created.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param object $activity Activity item before being saved.
+	 */
+	public function block_activity_saving( $activity ) {
+		$activity->component = false;
 	}
 
 	/**
