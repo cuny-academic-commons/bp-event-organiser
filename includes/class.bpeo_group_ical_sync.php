@@ -22,7 +22,7 @@ class BPEO_Group_Ical_Sync {
 
 		// EO hooks to save our custom BP meta.
 		add_action( 'added_post_meta',                         array( $this, 'save_group_id_to_feed' ), 10, 3 );
-		add_filter( 'eventorganiser_ical_sync_meta_key_map',   array( $this, 'disable_term_saving' ) );
+		add_filter( 'eventorganiser_ical_sync_meta_key_map',   array( $this, 'disable_term_and_activity_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_updated',  array( $this, 'reenable_term_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_inserted', array( $this, 'add_group_to_synced_event' ), 10, 3 );
 
@@ -288,8 +288,21 @@ class BPEO_Group_Ical_Sync {
 		add_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
 	}
 
-	public function disable_term_saving( $retval ) {
-		add_filter( 'pre_insert_term', array( $this, 'block_term_saving' ), 10, 2 );
+	/**
+	 * Disables term saving and activity creation.
+	 *
+	 * Terms are disabled if we've blocked categories or venues from being
+	 * imported.  Activity creation for the imported event is disabled to prevent
+	 * flooding the group stream.
+	 *
+	 * @todo Maybe turn activity creation back on?
+	 *
+	 * @param array $retval Meta key map array.
+	 */
+	public function disable_term_and_activity_saving( $retval ) {
+		add_filter( 'pre_insert_term',         array( $this, 'block_term_saving' ), 10, 2 );
+		add_action( 'bp_activity_before_save', array( $this, 'block_activity_saving' ), 0 );
+
 		return $retval;
 	}
 
@@ -386,6 +399,18 @@ class BPEO_Group_Ical_Sync {
 		}
 
 		return $retval;
+	}
+
+	/**
+	 * Block activity items from being created.
+	 *
+	 * To block activity items, we wipe out the activity's component property.
+	 * BuddyPress will then prevent the item from being created.
+	 *
+	 * @param object $activity Activity item before being saved.
+	 */
+	public function block_activity_saving( $activity ) {
+		$activity->component = false;
 	}
 
 	public function gettext_overrides( $translated_text, $untranslated_text, $domain ) {
