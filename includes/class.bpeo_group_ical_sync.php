@@ -252,7 +252,7 @@ class BPEO_Group_Ical_Sync {
 
 		// Also save a random feed color.
 		// @todo Make this customizable?
-		update_post_meta( $post_id, '_eventorganiser_feed_color', bpeo_get_item_calendar_color( $feed_id, 'feed' ) );
+		update_post_meta( $post_id, '_eventorganiser_feed_color', bpeo_get_item_calendar_color( $post_id, 'feed' ) );
 	}
 
 	public function add_group_to_synced_event( $event_id, $event, $feed_id ) {
