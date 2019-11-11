@@ -137,6 +137,9 @@ class BPEO_Group_Ical_Sync {
 		// Only fetch feeds for the current group.
 		add_action( 'pre_get_posts', array( $this, 'filter_feeds_by_group' ) );
 
+		// Do not query for event taxonomies if disabled.
+		add_filter( 'get_terms_args', array( $this, 'do_not_query_for_event_taxonomies' ), 10, 2 );
+
 		// Change some strings.
 		add_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
 
@@ -189,6 +192,7 @@ class BPEO_Group_Ical_Sync {
 		// Cleanup!
 		remove_filter( 'gettext', array( $this, 'gettext_overrides' ), 10 );
 		remove_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
+		remove_filter( 'get_terms_args', array( $this, 'do_not_query_for_event_taxonomies' ), 10 );
 		remove_action( 'pre_get_posts', array( $this, 'filter_feeds_by_group' ) );
 	}
 
@@ -303,6 +307,9 @@ class BPEO_Group_Ical_Sync {
 
 		// Limit members dropdown to group admins only.
 		add_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
+
+		// Do not query for event taxonomies if disabled.
+		add_filter( 'get_terms_args', array( $this, 'do_not_query_for_event_taxonomies' ), 10, 2 );
 	}
 
 	/**
@@ -461,6 +468,28 @@ class BPEO_Group_Ical_Sync {
 	 */
 	public function limit_dropdown_members_to_group_admins( $retval ) {
 		$retval['include'] = bp_group_admin_ids( groups_get_current_group(), 'array' );
+		return $retval;
+	}
+
+	/**
+	 * Don't fetch terms if we have disabled either event categories or venues.
+	 *
+	 * @param  array $retval Query args.
+	 * @param  array $taxonomies Taxonomies being queried.
+	 * @return array
+	 */
+	public function do_not_query_for_event_taxonomies( $retval, $taxonomies ) {
+		if ( empty( $taxonomies[0] ) ) {
+			return $retval;
+		}
+
+		// Set the taxonomy query to include a term that doesn't exist.
+		if ( true !== bpeo_is_import_categories_enabled() && 'event-category' === $taxonomies[0] ) {
+			$retval['include'] = '-1';
+		} elseif ( true !== bpeo_is_import_venues_enabled() && 'event-venue' === $taxonomies[0] ) {
+			$retval['include'] = '-1';
+		}
+
 		return $retval;
 	}
 
