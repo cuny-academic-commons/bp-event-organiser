@@ -174,21 +174,19 @@ class BPEO_Group_Ical_Sync {
 		printf( '<div class="%1$s">%2$s</div>', implode( ' ', $classes ), $contents );
 
 		// Inline JS. Hide "Assign events" field if only one person.
-		$js = <<<JS
-
-			<script>
-			jQuery(function($){
-				var assign = $('#col-left #feed-organiser');
+		$js = "<script>
+			jQuery(function(){
+				var assign = jQuery('#col-left #feed-organiser');
 				if ( 1 === assign.find('option').length ) {
 					assign.closest('.form-field').hide();
 
 					// Hide the quick edit field as well.
-					$('#col-right #feed-organiser').closest('label').hide();
+					jQuery('#col-right #feed-organiser').closest('label').hide();
 				}
 			});
 			</script>
 
-		JS;
+		";
 		echo $js;
 
 		// Cleanup!
