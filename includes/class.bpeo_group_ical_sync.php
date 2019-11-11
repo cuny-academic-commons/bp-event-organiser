@@ -122,10 +122,7 @@ class BPEO_Group_Ical_Sync {
 
 		// Only show group admins for Assign Events dropdown and not all users.
 		// @todo Maybe add group mods as well? Or all group members?
-		add_filter( 'wp_dropdown_users_args', function( $retval ) {
-			$retval['include'] = bp_group_admin_ids( groups_get_current_group(), 'array' );
-			return $retval;
-		} );
+		add_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
 
 		// Ensure we fetch the group's custom feed schedule.
 		add_filter( 'pre_option_eventorganiser_feed_schedule', function( $retval ) {
@@ -190,7 +187,8 @@ class BPEO_Group_Ical_Sync {
 		echo $js;
 
 		// Cleanup!
-		remove_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
+		remove_filter( 'gettext', array( $this, 'gettext_overrides' ), 10 );
+		remove_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
 		remove_action( 'pre_get_posts', array( $this, 'filter_feeds_by_group' ) );
 	}
 
@@ -302,6 +300,9 @@ class BPEO_Group_Ical_Sync {
 
 		// Change some strings.
 		add_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
+
+		// Limit members dropdown to group admins only.
+		add_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
 	}
 
 	/**
@@ -450,6 +451,17 @@ class BPEO_Group_Ical_Sync {
 		}
 
 		return $translated_text;
+	}
+
+	/**
+	 * Limit member dropdown to group admins only instead of all users.
+	 *
+	 * @param  array $retval Query args.
+	 * @return array
+	 */
+	public function limit_dropdown_members_to_group_admins( $retval ) {
+		$retval['include'] = bp_group_admin_ids( groups_get_current_group(), 'array' );
+		return $retval;
 	}
 
 	protected function get_events_slug() {
