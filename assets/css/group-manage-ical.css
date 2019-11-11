@@ -25,6 +25,7 @@ div.manage-icalendar .row-actions span.delete a {
 div.manage-icalendar .widefat td,
 div.manage-icalendar .widefat th {
 	padding: 8px 10px;
+	text-align: left;
 }
 
 .eo-advanced-feed-options-toggle {

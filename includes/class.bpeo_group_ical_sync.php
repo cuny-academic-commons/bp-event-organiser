@@ -200,7 +200,7 @@ class BPEO_Group_Ical_Sync {
 		wp_enqueue_style(
 			'bpeo-manage-group-ical',
 			BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/css/group-manage-ical.css',
-			array( 'list-tables', 'edit', 'buttons' ),
+			array( 'list-tables', 'edit', 'forms' ),
 			'20191105'
 		);
 	}
