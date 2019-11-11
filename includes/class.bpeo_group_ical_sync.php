@@ -173,6 +173,24 @@ class BPEO_Group_Ical_Sync {
 		// Output our table.
 		printf( '<div class="%1$s">%2$s</div>', implode( ' ', $classes ), $contents );
 
+		// Inline JS. Hide "Assign events" field if only one person.
+		$js = <<<JS
+
+			<script>
+			jQuery(function($){
+				var assign = $('#col-left #feed-organiser');
+				if ( 1 === assign.find('option').length ) {
+					assign.closest('.form-field').hide();
+
+					// Hide the quick edit field as well.
+					$('#col-right #feed-organiser').closest('label').hide();
+				}
+			});
+			</script>
+
+		JS;
+		echo $js;
+
 		// Cleanup!
 		remove_filter( 'gettext', array( $this, 'gettext_overrides' ), 10, 3 );
 		remove_action( 'pre_get_posts', array( $this, 'filter_feeds_by_group' ) );
