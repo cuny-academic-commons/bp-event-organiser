@@ -462,6 +462,11 @@ class BPEO_Group_Ical_Sync {
 			case 'Published' :
 				$translated_text = __( 'Public', 'bp-event-organiser' );
 				break;
+
+			case 'Source' :
+			case 'Slug' :
+				$translated_text = __( 'iCalendar URL', 'bp-event-organiser' );
+				break;
 		}
 
 		return $translated_text;
