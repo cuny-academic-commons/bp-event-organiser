@@ -447,7 +447,7 @@ class BPEO_Group_Ical_Sync {
 	public function gettext_overrides( $translated_text, $untranslated_text, $domain ) {
 		switch ( $untranslated_text ) {
 			case 'iCal Feeds' :
-				$translated_text = __( 'Manage iCalendar Feeds', 'bp-event-organiser' );
+				$translated_text = __( 'Subscribed Calendars', 'bp-event-organiser' );
 				break;
 
 			case 'Event status' :

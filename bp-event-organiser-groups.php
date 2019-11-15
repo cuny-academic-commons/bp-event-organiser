@@ -731,10 +731,10 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	?>
 
 		<div class="manage-icalendar manage-icalendar-ics">
-			<h3><?php esc_html_e( 'Import Events from iCalendar File', 'bp-event-organiser' ); ?></h3>
+			<h3><?php esc_html_e( 'Event Import', 'bp-event-organiser' ); ?></h3>
 
 			<form method="post" action="" enctype="multipart/form-data">
-				<p><?php esc_html_e( "Select an iCalendar file that you would like to import into the group's calendar. The file should be an .ics file.", 'bp-event-organiser' ); ?></p>
+				<p><?php esc_html_e( "Perform a one-time import of one or more events into your group's calendar. Select an .ics file to get started.", 'bp-event-organiser' ); ?></p>
 
 				<?php if ( taxonomy_exists( 'event-venue' ) && bpeo_is_import_venues_enabled() ) : ?>
 					<label><input type="checkbox" name="eo_import_venue" value="1" /> <?php _e( 'Import and create venues if they do not exist', 'bp-event-organiser' ); ?></label>
