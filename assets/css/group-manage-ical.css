@@ -69,3 +69,12 @@ div.disable-eo-venues .inline-edit-col label:nth-child(6) {
 	/* nth-child(6) is such a hack... */
 	display: none;
 }
+
+/* hide post status field */
+div.manage-icalendar label[for="feed-status"],
+div.manage-icalendar #feed-status,
+div.manage-icalendar #feed-status option[value="draft"],
+div.manage-icalendar #feed-status option[value="pending"],
+div.manage-icalendar-feeds .inline-edit-col label:nth-child(7) {
+	display: none;
+}
