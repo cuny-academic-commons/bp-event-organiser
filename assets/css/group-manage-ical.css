@@ -48,9 +48,10 @@ div.manage-icalendar-ics label {
 	margin-bottom: 1em;
 }
 
-/* hide some post statuses that are not applicable to us */
-div.manage-icalendar #feed-status option[value="draft"],
-div.manage-icalendar #feed-status option[value="pending"] {
+/* hide organiser if we've disabled it */
+div.disable-eo-organiser label[for="feed-organiser"],
+div.disable-eo-organiser #feed-organiser,
+div.disable-eo-organiser .inline-edit-col label:nth-child(4) {
 	display: none;
 }
 

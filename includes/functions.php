@@ -844,6 +844,26 @@ add_filter( 'ajax_query_attachments_args', 'bpeo_filter_ajax_query_attachments' 
 /** Import ICS ***************************************************************/
 
 /**
+ * Can an imported event be assigned to a different user?
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_assign_organiser_enabled() {
+	/**
+	 * Filter to toggle if a different user can be assigned to an imported event.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: false
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_assign_organiser', false );
+
+	return $retval;
+}
+
+/**
  * See if categories can be imported from an ICS file.
  *
  * @since 1.1.0

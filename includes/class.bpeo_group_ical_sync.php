@@ -163,6 +163,9 @@ class BPEO_Group_Ical_Sync {
 
 		// Container classes.
 		$classes = array( 'manage-icalendar', 'manage-icalendar-feeds' );
+		if ( true !== bpeo_is_import_assign_organiser_enabled() ) {
+			$classes[] = 'disable-eo-organiser';
+		}
 		if ( true !== bpeo_is_import_categories_enabled() ) {
 			$classes[] = 'disable-eo-categories';
 		}
