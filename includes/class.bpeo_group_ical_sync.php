@@ -21,7 +21,7 @@ class BPEO_Group_Ical_Sync {
 		add_action( 'wp_ajax_fetch-eo-feed',  array( $this, 'ajax_mods' ), 0 );
 
 		// EO hooks to save our custom BP meta.
-		add_action( 'added_post_meta',                         array( $this, 'save_group_id_to_feed' ), 10, 3 );
+		add_action( 'added_post_meta',                         array( $this, 'on_feed_creation' ), 10, 3 );
 		add_filter( 'eventorganiser_ical_sync_meta_key_map',   array( $this, 'disable_term_and_activity_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_updated',  array( $this, 'reenable_term_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_inserted', array( $this, 'add_group_to_synced_event' ), 10, 3 );
@@ -50,6 +50,7 @@ class BPEO_Group_Ical_Sync {
 		remove_action( 'eventorganiser_ical_feed_sync', 'eo_fetch_feeds' );
 		add_action( 'bpeo_group_ical_sync',   array( $this, 'sync' ) );
 		add_action( 'bp_groups_delete_group', array( $this, 'delete_cron_on_group_delete' ) );
+		add_filter( 'pre_delete_post',        array( $this, 'delete_cron_on_feed_delete' ), 10, 2 );
 	}
 
 	/* MANAGE > EVENTS PAGE *************************************************/
@@ -204,9 +205,57 @@ class BPEO_Group_Ical_Sync {
 		}
 	}
 
+	/**
+	 * Removes iCalendar cron job if there are no more feeds for the group.
+	 *
+	 * @param mixed $retval Null by default
+	 * @param WP_Post $post WP Post object.
+	 */
+	public function delete_cron_on_feed_delete( $retval, $post ) {
+		if ( 'eo_icalfeed' !== $post->post_type ) {
+			return $retval;
+		}
+
+		// If no group ID, bail.
+		$group_id = get_post_meta( $post->ID, '_eventorganiser_feed_group_id', true );
+		if ( empty( $group_id ) ) {
+			return $retval;
+		}
+
+		// Bail if there is more than one feed.
+		$feeds = eo_get_feeds( array(
+			'fields'     => 'ids',
+			'meta_key'   => '_eventorganiser_feed_group_id',
+			'meta_value' => $group_id
+		) );
+		if ( count( $feeds ) > 1 ) {
+			return $retval;
+		}
+
+		// 1 feed means we can delete the feed.
+		$schedule_args = array( (int) $group_id );
+		$next = wp_next_scheduled( 'bpeo_group_ical_sync', $schedule_args );
+		if ( false !== $next ) {
+			wp_unschedule_event( $next, 'bpeo_group_ical_sync', $schedule_args );
+		}
+
+		return $retval;
+	}
+
 	/** SAVE HOOKS **********************************************************/
 
-	public function save_group_id_to_feed( $meta_id, $post_id, $meta_key ) {
+	/**
+	 * Do some things when an iCalendar feed is created.
+	 *
+	 * - Add the group ID to the feed as post meta
+	 * - Add a custom background color for the feed as post meta
+	 * - Add an hourly cronjob for the group if one doesn't exist
+	 *
+	 * @param int    $meta_id Meta ID
+	 * @param int    $post_id Post ID
+	 * @param string $meta_key Meta key to check.
+	 */
+	public function on_feed_creation( $meta_id, $post_id, $meta_key ) {
 		if ( '_eventorganiser_feed_source' !== $meta_key ) {
 			return;
 		}
@@ -223,6 +272,12 @@ class BPEO_Group_Ical_Sync {
 		// Also save a random feed color.
 		// @todo Make this customizable?
 		update_post_meta( $post_id, '_eventorganiser_feed_color', bpeo_get_item_calendar_color( $post_id, 'feed' ) );
+
+		// Add an hourly cronjob for the group if one doesn't exist.
+		$schedule_args = array( (int) $group->id );
+		if ( false === wp_next_scheduled( 'bpeo_group_ical_sync', $schedule_args ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'bpeo_group_ical_sync', $schedule_args );
+		}
 	}
 
 	public function add_group_to_synced_event( $event_id, $event, $feed_id ) {
