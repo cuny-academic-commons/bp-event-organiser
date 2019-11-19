@@ -68,37 +68,6 @@ class BPEO_Group_Ical_Sync {
 			return;
 		}
 
-		// Feed schedule validation routine.
-		if ( ! empty( $_POST['action'] ) && 'eventorganier-update-feed-settings' === $_POST['action'] ) {
-			check_admin_referer( 'eventorganier-update-feed-settings' );
-
-			$schedule = $_POST['eventorganiser_feed_schedule'];
-			$current_schedule = groups_get_groupmeta( bp_get_current_group_id(), 'eventorganiser_feed_schedule' );
-
-			if ( $schedule != $current_schedule ) {
-				$schedule_args = array( bp_get_current_group_id() );
-
-				// Unschedule current cronjob for the group.
-				$next = wp_next_scheduled( 'bpeo_group_ical_sync', $schedule_args );
-				if ( false !== $next ) {
-					wp_unschedule_event( $next, 'bpeo_group_ical_sync', $schedule_args );
-				}
-
-				// Update custom schedule marker.
-				groups_update_groupmeta( bp_get_current_group_id(), 'eventorganiser_feed_schedule', $schedule );
-
-				// Add new cronjob for group.
-				if ( ! empty( $schedule ) ) {
-					$schedules = wp_get_schedules();
-					$timestamp = time() + $schedules[ $schedule ]['interval'];
-					wp_schedule_event( $timestamp, $schedule, 'bpeo_group_ical_sync', $schedule_args );
-				}
-			}
-
-			bp_core_add_message( __( 'Feed sync settings updated', 'bp-event-organiser' ) );
-			bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->get_events_slug() . '/' );
-		}
-
 		// Display hooks.
 		add_action( 'wp_enqueue_scripts',  array( $this, 'enqueue_assets' ) );
 		add_action( 'bp_after_group_body', array( $this, 'manage_events_display_ical_feeds' ) );
@@ -123,16 +92,6 @@ class BPEO_Group_Ical_Sync {
 		// Only show group admins for Assign Events dropdown and not all users.
 		// @todo Maybe add group mods as well? Or all group members?
 		add_filter( 'wp_dropdown_users_args', array( $this, 'limit_dropdown_members_to_group_admins' ) );
-
-		// Ensure we fetch the group's custom feed schedule.
-		add_filter( 'pre_option_eventorganiser_feed_schedule', function( $retval ) {
-			$schedule = groups_get_groupmeta( bp_get_current_group_id(), 'eventorganiser_feed_schedule' );
-			if ( ! empty( $schedule ) ) {
-				return $schedule;
-			} else {
-				return 0;
-			}
-		} );
 
 		// Only fetch feeds for the current group.
 		add_action( 'pre_get_posts', array( $this, 'filter_feeds_by_group' ) );
