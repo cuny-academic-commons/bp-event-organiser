@@ -36,7 +36,8 @@ div.manage-icalendar-ics label {
 	display: block;
 }
 
-div.manage-icalendar-feeds .hide-if-js {
+div.manage-icalendar-feeds .hide-if-js,
+div.manage-icalendar-feeds label[for="sync-schedule"] {
 	display: none;
 }
 

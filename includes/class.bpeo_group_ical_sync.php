@@ -208,7 +208,7 @@ class BPEO_Group_Ical_Sync {
 			'bpeo-manage-group-ical',
 			BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/css/group-manage-ical.css',
 			array( 'list-tables', 'edit', 'forms' ),
-			'20191105'
+			'20191118'
 		);
 	}
 
