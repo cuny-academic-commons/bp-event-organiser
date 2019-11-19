@@ -127,7 +127,9 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		// Import ICS
 		if ( class_exists( 'Event_Organiser_Im_Export' ) ) {
-			add_action( 'bp_actions', array( $this, 'manage_events_import_ics' ), 7 );
+			add_action( 'bp_actions',                           array( $this, 'manage_events_import_ics' ), 7 );
+			add_filter( 'bpeo_get_the_filter_title',            array( $this, 'filter_filter_title' ) );
+			add_action( 'eventorganiser_additional_event_meta', array( $this, 'show_ics_data_in_event' ), 40 );
 		}
 	}
 
@@ -784,6 +786,9 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		// Save the filename into event meta, just in case.
 		update_post_meta( $post_id, '_eventorganiser_import_filename', $_FILES['ics']['name'] );
 
+		// Save the SHA-1 hash for the file.
+		update_post_meta( $post_id, '_eventorganiser_import_file_hash', sha1_file( $_FILES['ics']['tmp_name'] ) );
+
 		// Ensure events imported in a private group are private.
 		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
 			wp_update_post( array(
@@ -791,6 +796,56 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'post_status' => 'private'
 			) );
 		}
+	}
+
+	/**
+	 * Show ICS filename when filtering calendar by ICS file import.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $retval
+	 */
+	public function filter_filter_title( $retval ) {
+		if ( empty( $_GET['ical_hash'] ) ) {
+			return $retval;
+		}
+
+		// Grab the filename for the hashed ICS file.
+		$q = new WP_Query( array(
+			'meta_key' => '_eventorganiser_import_file_hash',
+			'meta_value' => $_GET['ical_hash'],
+			'posts_per_page' => 1,
+			'paged' => 1,
+			'fields' => 'ids',
+			'post_type' => 'event'
+		) );
+		$post = $q->get_posts();
+
+		return sprintf( __( "Filtered by file '%s'", 'bp-event-organiser' ), esc_html( get_post_meta( $post[0], '_eventorganiser_import_filename', true ) ) );
+	}
+
+	/**
+	 * Adds an "Imported From" field to a group event to display the ICS filename.
+	 *
+	 * @since 1.1.0
+	 */
+	public function show_ics_data_in_event() {
+		// Show this only in groups for now...
+		if ( ! bp_is_group() ) {
+			return;
+		}
+
+		$ics = get_post_meta( get_the_ID(), '_eventorganiser_import_filename', true );
+		if ( empty( $ics ) ) {
+			return;
+		}
+
+		printf( '<li><strong>' . esc_html( 'Imported from:', 'bp-event-organiser' ) . '</strong> %s</li>',
+			sprintf( '<a href="%1$s">%2$s</a>',
+				esc_url( add_query_arg( 'ical_hash', get_post_meta( get_the_ID(), '_eventorganiser_import_file_hash', true ), bpeo_get_group_permalink() ) ),
+				esc_html( $ics )
+			)
+		);
 	}
 
 	/**
