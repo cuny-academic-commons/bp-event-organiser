@@ -112,6 +112,11 @@ class BPEO_Group_Ical_Sync {
 		// Some markup adjustments.
 		$contents = str_replace( '&lt;br/&gt;', '<br />', $contents );
 
+		// Inject description for hourly cronjob.
+		$cronjob_desc = esc_html__( 'Subscribe to an external calendar by entering the URL of its iCalendar (iCal) feed. Recent events from that calendar will be imported to your group calendar. New events in the feed will be automatically imported every 60 minutes.', 'bp-event-organiser' );
+		$feed_header = __( 'Add New Feed', 'eventorganiserical' ) . '</h4>';
+		$contents = str_replace( $feed_header, $feed_header . '<p>' . $cronjob_desc . '</p>', $contents );
+
 		/**
 		 * Filters the markup from EO's iCal feeds form.
 		 *
