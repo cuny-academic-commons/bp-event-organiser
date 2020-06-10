@@ -142,7 +142,7 @@ class BPEO_Component extends BP_Component {
 		}
 
 		// omit iCal feeds
-		if ( bp_is_current_action( 'ical' ) || true === ctype_xdigit( bp_current_action() ) ) {
+		if ( bpeo_is_ics() ) {
 			$this->ical_action();
 			return;
 		}

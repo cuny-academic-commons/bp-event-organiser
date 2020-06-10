@@ -230,7 +230,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			add_action( 'bp_template_content', array( $this, 'call_display' ) );
 
 		// iCal
-		} elseif ( bp_is_action_variable( 'ical' ) || true === ctype_xdigit( bp_action_variable() ) ) {
+		} elseif ( bpeo_is_ics() ) {
 			$this->ical_action();
 			return;
 
@@ -525,19 +525,11 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		);
 
 		// public iCal
-		if ( bp_is_action_variable( 'ical' ) && 'public' === bp_get_group_status( groups_get_current_group() ) ) {
+		if ( 'public' === bp_get_group_status( groups_get_current_group() ) ) {
 			$args['name'] = bp_get_group_name( groups_get_current_group() );
 
 		// private iCal
 		} else {
-			if ( false === bp_is_action_variable( bpeo_get_the_group_private_ical_hash() ) ) {
-				return;
-			}
-
-			if ( false === bp_is_action_variable( 'ical', 1 ) ) {
-				return;
-			}
-
 			$args['name'] = sprintf( __( '%s (Private)', 'bp-event-organiser' ), bp_get_group_name( groups_get_current_group() ) );
 		}
 
@@ -558,7 +550,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			return $retval;
 		}
 
-		if ( bp_is_current_action( bpeo_get_events_slug() ) && bp_is_action_variable( 'ical' ) && true === ctype_xdigit( bp_action_variable( 0 ) ) ) {
+		if ( bpeo_is_ics() ) {
 			$this->ical_action();
 
 			/** This filter is documented in /wp-includes/template-loader.php */

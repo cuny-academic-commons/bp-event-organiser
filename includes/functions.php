@@ -280,6 +280,51 @@ function bpeo_the_ical_link( $post_id ) {
 	}
 
 /**
+ * Function to check if the current page is for an ICS URL.
+ *
+ * @since 1.2.0
+ */
+function bpeo_is_ics() {
+	if ( bp_is_group() ) {
+		if ( ! bp_is_current_action( bpeo_get_events_slug() ) ) {
+			return false;
+		}
+
+		// public iCal
+		if ( bp_is_action_variable( 'ical' ) && 'public' === bp_get_group_status( groups_get_current_group() ) ) {
+			return true;
+
+		// private iCal
+		} elseif ( 'public' !== bp_get_group_status( groups_get_current_group() ) &&
+			bp_is_action_variable( 'ical', 1 ) &&
+			32 === strlen( bp_action_variable( 0 ) ) &&
+			bp_is_action_variable( bpeo_get_the_group_private_ical_hash() )
+		) {
+				return true;
+		}
+
+	} elseif ( bp_is_user() ) {
+		if ( ! bp_is_current_component( bpeo_get_events_slug() ) ) {
+			return false;
+		}
+
+		// public iCal
+		if ( bp_is_current_action( 'ical' ) ) {
+			return true;
+
+		// private iCal
+		} elseif ( bp_is_action_variable( 'ical' ) &&
+			32 === strlen( bp_current_action() ) &&
+			bp_is_current_action( bpeo_get_the_user_private_ical_hash() )
+		) {
+				return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Output the single event action links.
  *
  * @param WP_Post|int $post The WP Post object or the post ID.
