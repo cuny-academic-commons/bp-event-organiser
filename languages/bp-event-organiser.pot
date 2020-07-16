@@ -1,52 +1,446 @@
-# Copyright (C) 2013 BuddyPress Event Organiser
-# This file is distributed under the same license as the BuddyPress Event Organiser package.
+# Copyright (C) 2020 CUNY Academic Commons Team
+# This file is distributed under the same license as the Group Events Shortcode and Widget plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: BuddyPress Event Organiser 0.2\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/bp-event-organiser\n"
-"POT-Creation-Date: 2013-09-24 20:22:35+00:00\n"
+"Project-Id-Version: Group Events Shortcode and Widget\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bp-event-organiser\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2020-07-16T16:24:28-05:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: bp-event-organiser\n"
 
-#: bp-event-organiser-eo.php:277
-msgid "No groups were found."
+#. Plugin Name of the plugin
+msgid "Group Events Shortcode and Widget"
 msgstr ""
 
-#: bp-event-organiser-groups.php:78 bp-event-organiser-groups.php:121
+#. Description of the plugin
+msgid "Embed events from one of your groups that you are a member of with a shortcode or a widget."
+msgstr ""
+
+#. Author of the plugin
+msgid "CUNY Academic Commons Team"
+msgstr ""
+
+#: bp-event-organiser-eo.php:48
+msgid "BP Event Organiser requires version 2+ of Event Organiser."
+msgstr ""
+
+#: bp-event-organiser-eo.php:243
+msgid "BuddyPress Groups"
+msgstr ""
+
+#: bp-event-organiser-eo.php:243
+msgid "Groups"
+msgstr ""
+
+#: bp-event-organiser-eo.php:272
+msgid "Enter the names of each group this event should appear in."
+msgstr ""
+
+#: bp-event-organiser-eo.php:285
+msgid "To remove a group, click on the \"x\" link."
+msgstr ""
+
+#: bp-event-organiser-groups.php:78
+#: bp-event-organiser-groups.php:102
+#: includes/component.php:37
+#: includes/component.php:102
+msgid "Events"
+msgstr ""
+
+#: bp-event-organiser-groups.php:157
+#: includes/component.php:49
+#: includes/component.php:109
+msgid "Calendar"
+msgstr ""
+
+#: bp-event-organiser-groups.php:165
+#: includes/component.php:58
+msgid "Upcoming"
+msgstr ""
+
+#: bp-event-organiser-groups.php:178
+#: includes/component.php:67
+msgid "Manage"
+msgstr ""
+
+#: bp-event-organiser-groups.php:188
+#: includes/component.php:76
+#: includes/component.php:116
+msgid "New Event"
+msgstr ""
+
+#: bp-event-organiser-groups.php:213
+#: bp-event-organiser-groups.php:365
+#: includes/component.php:262
+msgid "You do not have access to edit this event."
+msgstr ""
+
+#: bp-event-organiser-groups.php:281
 msgid "Group Events"
 msgstr ""
 
-#. translators: %s: title of private group
+#: bp-event-organiser-groups.php:345
+#: includes/component.php:175
+msgid "Event does not exist."
+msgstr ""
 
-#: bp-event-organiser-walker.php:93
+#: bp-event-organiser-groups.php:353
+msgid "Event does not belong to this group."
+msgstr ""
+
+#: bp-event-organiser-groups.php:383
+#: bp-event-organiser-groups.php:390
+#: includes/component.php:307
+#: includes/component.php:314
+msgid "You do not have permission to delete this event."
+msgstr ""
+
+#: bp-event-organiser-groups.php:398
+#: includes/component.php:322
+msgid "There was a problem deleting the event."
+msgstr ""
+
+#: bp-event-organiser-groups.php:400
+#: includes/component.php:324
+msgid "Event deleted."
+msgstr ""
+
+#: bp-event-organiser-groups.php:533
+#: includes/component.php:582
 msgid "%s (Private)"
 msgstr ""
 
-#. translators: %s: title of hidden group
-
-#: bp-event-organiser-walker.php:97
-msgid "%s (Hidden)"
-msgstr ""
-#. Plugin Name of the plugin/theme
-msgid "BuddyPress Event Organiser"
+#: bp-event-organiser-groups.php:587
+#: includes/component.php:455
+msgid "Private iCalendar URL has been reset. Please copy the new link below to use in your calendar application."
 msgstr ""
 
-#. Plugin URI of the plugin/theme
-msgid "http://haystack.co.uk"
+#: includes/activity.php:44
+msgid "Title: %s"
 msgstr ""
 
-#. Description of the plugin/theme
-msgid "A WordPress plugin for assigning Event Organiser plugin Events to BuddyPress Groups and Group Hierarchies"
+#: includes/activity.php:46
+msgid "Description: %s"
 msgstr ""
 
-#. Author of the plugin/theme
-msgid "Christian Wach"
+#: includes/activity.php:54
+msgid "Date: %s %s"
 msgstr ""
 
-#. Author URI of the plugin/theme
-msgid "http://haystack.co.uk"
+#: includes/activity.php:60
+msgid "Location: %s"
+msgstr ""
+
+#: includes/activity.php:180
+#: includes/group.php:393
+msgid "Events created"
+msgstr ""
+
+#: includes/activity.php:189
+#: includes/group.php:402
+msgid "Events edited"
+msgstr ""
+
+#: includes/activity.php:198
+#: includes/group.php:411
+msgid "Events deleted"
+msgstr ""
+
+#. translators: 1: link to user, 2: link to event
+#: includes/activity.php:231
+msgid "%1$s created the event %2$s"
+msgstr ""
+
+#. translators: 1: link to user, 2: link to event
+#: includes/activity.php:236
+#: includes/activity.php:241
+msgid "%1$s edited the event %2$s"
+msgstr ""
+
+#: includes/class.bpeo_frontend_admin_screen.php:21
+msgid "Event successfully created"
+msgstr ""
+
+#: includes/class.bpeo_frontend_admin_screen.php:22
+msgid "Event updated"
+msgstr ""
+
+#: includes/class.bpeo_frontend_admin_screen.php:23
+msgid "Enter Event Title"
+msgstr ""
+
+#: includes/class.bpeo_frontend_admin_screen.php:24
+msgid "Insert into event"
+msgstr ""
+
+#: includes/class.bpeo_group_oembed_extension.php:83
+msgid "%s - Group Calendar"
+msgstr ""
+
+#: includes/component.php:13
+msgid "Event Organiser"
+msgstr ""
+
+#: includes/component.php:210
+msgid "Manage Events"
+msgstr ""
+
+#: includes/component.php:279
+#: includes/component.php:286
+msgid "You do not have permission to restore this event."
+msgstr ""
+
+#: includes/component.php:294
+msgid "There was a problem restoring the event."
+msgstr ""
+
+#: includes/component.php:296
+msgid "'%s' restored."
+msgstr ""
+
+#: includes/component.php:507
+#: includes/component.php:533
+msgid "Status"
+msgstr ""
+
+#: includes/component.php:508
+msgctxt "Manage events header"
+msgid "Event"
+msgstr ""
+
+#: includes/component.php:509
+#: includes/component.php:535
+msgid "Event Date"
+msgstr ""
+
+#: includes/component.php:510
+#: includes/component.php:539
+msgid "Publish Date"
+msgstr ""
+
+#: includes/component.php:524
+msgid "Edit"
+msgstr ""
+
+#: includes/component.php:526
+msgid "Restore"
+msgstr ""
+
+#: includes/component.php:529
+msgid "Delete"
+msgstr ""
+
+#: includes/component.php:534
+msgid "Event"
+msgstr ""
+
+#: includes/component.php:547
+msgid "Looks like you have no unpublished events to manage.  To create a new event, click on the \"New Event\" link above."
+msgstr ""
+
+#: includes/functions.php:49
+msgid "Filters"
+msgstr ""
+
+#: includes/functions.php:50
+msgid "By Author"
+msgstr ""
+
+#: includes/functions.php:51
+msgid "By Group"
+msgstr ""
+
+#: includes/functions.php:56
+msgid "You have added a group to this event.  Since groups have their own privacy settings, we have removed the ability to set the status for this event."
+msgstr ""
+
+#: includes/functions.php:57
+msgid "You have added a %1$s to this event. Since the added group is %2$s, be aware that your event will also be publicized on the sitewide event calendar."
+msgstr ""
+
+#: includes/functions.php:58
+msgid "public group"
+msgstr ""
+
+#: includes/functions.php:59
+msgid "public"
+msgstr ""
+
+#: includes/functions.php:179
+msgid "Filtered by category '%s'"
+msgstr ""
+
+#: includes/functions.php:181
+msgid "Filtered by tag '%s'"
+msgstr ""
+
+#: includes/functions.php:414
+msgid "This %1$s is a draft.  Please remember to publish this %1$s once you are ready."
+msgstr ""
+
+#: includes/functions.php:418
+msgid "This %1$s is scheduled to be published at <strong>%2$s</strong>."
+msgstr ""
+
+#. translators: Date format for future event messages, see http://php.net/date
+#: includes/functions.php:421
+msgid "M j, Y @ G:i"
+msgstr ""
+
+#: includes/functions.php:427
+msgid "This %1$s is marked as private.  Only site moderators and yourself can view this %1$s."
+msgstr ""
+
+#: includes/functions.php:642
+msgid "%sDownload iCalendar file%s to save this event to your preferred calendar application"
+msgstr ""
+
+#: includes/functions.php:703
+msgid "Room:"
+msgstr ""
+
+#: includes/group.php:29
+#: includes/group.php:56
+msgid "No group found by that ID."
+msgstr ""
+
+#: includes/group.php:34
+#: includes/group.php:61
+msgid "No event found by that ID."
+msgstr ""
+
+#: includes/group.php:66
+msgid "No event found by that ID connected to this group."
+msgstr ""
+
+#. translators: 1: link to user, 2: link to event, 3: comma-separated list of group links
+#: includes/group.php:509
+msgid "%1$s created the event %2$s in the group %3$s."
+msgid_plural "%1$s created the event %2$s in the groups %3$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: link to user, 2: link to event, 3: comma-separated list of group links
+#: includes/group.php:514
+msgid "%1$s edited the event %2$s in the group %3$s."
+msgid_plural "%1$s edited the event %2$s in the groups %3$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: link to user, 2: link to event, 3: comma-separated list of group links
+#: includes/group.php:519
+msgid "%1$s deleted the event %2$s in the group %3$s."
+msgid_plural "%1$s deleted the event %2$s in the groups %3$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/group.php:636
+msgid "<strong>Connected group:</strong> %s"
+msgid_plural "<strong>Connected groups:</strong> %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/group.php:663
+msgid "Silent Create"
+msgstr ""
+
+#: includes/group.php:665
+msgid "Silent Edit"
+msgstr ""
+
+#: includes/group.php:670
+msgid "(notifications will not be sent to subscribed group members)"
+msgstr ""
+
+#: includes/group.php:1008
+msgid "Download iCalendar file:"
+msgstr ""
+
+#: includes/user.php:384
+msgid "<strong>Author:</strong> %s"
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:2
+#: templates/buddypress/events/manage-user-ical.php:2
+msgid "Manage iCalendar Settings"
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:4
+#: templates/buddypress/events/manage-user-ical.php:4
+msgid "Private URL:"
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:8
+msgid "This is the private iCalendar link for your group calendar. Do not share this address with others unless you want them to see all events from your group's calendar."
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:10
+#: templates/buddypress/events/manage-user-ical.php:10
+msgid "You can copy and paste this link into any calendar application that supports the iCalendar format."
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:12
+#: templates/buddypress/events/manage-user-ical.php:12
+msgid "You can also reset your private iCalendar link below:"
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:21
+#: templates/buddypress/events/manage-user-ical.php:21
+msgid "Reset private URL"
+msgstr ""
+
+#: templates/buddypress/events/manage-group-ical.php:22
+#: templates/buddypress/events/manage-user-ical.php:22
+msgid "This will invalidate the existing private iCalendar link and generate a new link."
+msgstr ""
+
+#: templates/buddypress/events/manage-user-ical.php:8
+msgid "This is the private iCalendar link for your calendar. Do not share this address with others unless you want them to see all events from your calendar."
+msgstr ""
+
+#: templates/calendar.php:29
+msgid "Subscribe"
+msgstr ""
+
+#: templates/calendar.php:32
+msgid "You can copy and paste the following link into any calendar application that supports the iCalendar format."
+msgstr ""
+
+#: templates/calendar.php:37
+msgid "Only public events are listed in this iCalendar. Suitable for sharing."
+msgstr ""
+
+#: templates/calendar.php:37
+msgid "Subscribe to calendar (Public)"
+msgstr ""
+
+#: templates/calendar.php:40
+msgid "Both public and private events are listed in this iCalendar.  Be mindful of who you share this with."
+msgstr ""
+
+#: templates/calendar.php:40
+#: templates/calendar.php:50
+msgid "Subscribe to calendar (Private)"
+msgstr ""
+
+#: templates/calendar.php:47
+msgid "Subscribe to calendar"
+msgstr ""
+
+#: templates/calendar.php:50
+msgid "This is a private group.  Be mindful of who you share this calendar with."
+msgstr ""
+
+#: templates/content-eo-event.php:2
+msgid "Event Description"
+msgstr ""
+
+#: templates/upcoming.php:29
+msgid "No upcoming events found."
 msgstr ""
