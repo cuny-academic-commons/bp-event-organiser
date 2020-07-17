@@ -51,7 +51,9 @@ function bpeo_create_activity_for_event( $event_id, $event = null, $update = nul
 			$dateTime->setTimeZone( new DateTimeZone( eo_get_blog_timezone()->getName() ) );
 
 			$event_timezone = $dateTime->format('T');
-			$content_parts['date'] = sprintf( __( 'Date: %s %s', 'bp-event-organiser' ), esc_html( $date ), esc_html( $event_timezone ) );
+
+			/* translators: Formatted event date + timezone abbreviation */
+			$content_parts['date'] = sprintf( __( 'Date: %1$s %2$s', 'bp-event-organiser' ), esc_html( $date ), esc_html( $event_timezone ) );
 		}
 
 		$venue_id = eo_get_venue( $event_id );

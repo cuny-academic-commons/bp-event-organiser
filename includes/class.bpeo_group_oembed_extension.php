@@ -80,6 +80,7 @@ class BPEO_Group_oEmbed_Extension extends BP_Core_oEmbed_Extension {
 		$group_name = bp_get_group_name( $group );
 
 		return array(
+			/* translators - Group name for calendar, used in oEmbed response */
 			'title'        => sprintf( __( '%s - Group Calendar', 'bp-event-organiser' ), $group_name ),
 			'author_name'  => $group_name,
 			'author_url'   => bpeo_get_group_permalink( $group ),

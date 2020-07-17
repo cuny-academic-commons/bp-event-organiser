@@ -54,6 +54,8 @@ function bpeo_enqueue_assets() {
 
 	wp_localize_script( 'bpeo-group-select', 'BpEventOrganiserSettings', array(
 		'group_privacy_message' => __( 'You have added a group to this event.  Since groups have their own privacy settings, we have removed the ability to set the status for this event.', 'bp-event-organiser' ),
+
+		/* translators: %1$s - public group, %2%s - public */
 		'group_public_message' => sprintf( __( 'You have added a %1$s to this event. Since the added group is %2$s, be aware that your event will also be publicized on the sitewide event calendar.', 'bp-event-organiser' ),
 			'<strong>' . __( 'public group', 'bp-event-organiser' ) . '</strong>',
 			'<strong>' . __( 'public', 'bp-event-organiser' ) . '</strong>'
@@ -420,10 +422,12 @@ function bpeo_the_post_status_message( $post = 0 ) {
 
 		switch ( $post->post_status ) {
 			case 'draft' :
+				/* translators: %1$s - Singular name label for event post type */
 				$message = sprintf( __( 'This %1$s is a draft.  Please remember to publish this %1$s once you are ready.', 'bp-event-organiser' ), strtolower( $post_type->labels->singular_name ) );
 				break;
 
 			case 'future' :
+				/* translators: %1$s - Singular name label for event post type, %2$s - Scheduled event date. */
 				$message = sprintf( __( 'This %1$s is scheduled to be published at <strong>%2$s</strong>.', 'bp-event-organiser' ),
 	strtolower( $post_type->labels->singular_name ),
 	/* translators: Date format for future event messages, see http://php.net/date */
@@ -433,6 +437,7 @@ function bpeo_the_post_status_message( $post = 0 ) {
 
 			case 'private' :
 				if ( ! bp_is_group() ) {
+					/* translators: %1$s - Singular name label for event post type */
 					$message = sprintf( __( 'This %1$s is marked as private.  Only site moderators and yourself can view this %1$s.', 'bp-event-organiser' ), strtolower( $post_type->labels->singular_name ) );
 				}
 				break;
@@ -650,6 +655,7 @@ function bpeo_add_ical_link_to_eventmeta() {
 	}
 ?>
 	<li><?php
+		/* translators: Do not remove references to %s as it is for the iCalendar link */
 		printf(
 		__( "%sDownload iCalendar file%s to save this event to your preferred calendar application", 'bp-event-organiser' ),
 		'<a class="bpeo-ical-link" href="' . bpeo_get_the_ical_link( get_the_ID() ) . '"><span class="icon"></span>',

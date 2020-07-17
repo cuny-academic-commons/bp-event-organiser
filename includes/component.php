@@ -293,6 +293,7 @@ class BPEO_Component extends BP_Component {
 			if ( false === $delete ) {
 				bp_core_add_message( __( 'There was a problem restoring the event.', 'bp-event-organiser' ), 'error' );
 			} else {
+				/* translators: Title of event restored from trash */
 				bp_core_add_message( sprintf( __( "'%s' restored.", 'bp-event-organiser' ), $this->queried_event->post_title ) );
 			}
 

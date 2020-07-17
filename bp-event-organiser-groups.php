@@ -531,6 +531,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		// private iCal
 		} else {
+			/* translators: Group name for private iCalendar ICS file */
 			$args['name'] = sprintf( __( '%s (Private)', 'bp-event-organiser' ), bp_get_group_name( groups_get_current_group() ) );
 		}
 
@@ -687,7 +688,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			} else {
 				$EO_Errors = new WP_Error( 'eo_error', __( "Invalid file uploaded. The file must be a ics calendar file of type 'text/calendar', no larger than 2MB.", 'bp-event-organiser' ) );
 				$size = size_format( $_FILES["ics"]["size"], 2 );
-				$details = sprintf( __( 'File size: %s. File type: %s', 'bp-event-organiser' ), $size, $_FILES["ics"]["type"] );
+				$details = sprintf( __( 'File size: %1$s. File type: %2$s', 'bp-event-organiser' ), $size, $_FILES["ics"]["type"] );
 				$EO_Errors->add( 'eo_error', $details );
 			}
 
