@@ -491,8 +491,11 @@ function bpeo_remove_default_canonical_event_content( $retval ) {
 		return $retval;
 	}
 
-	if( is_singular('event') && false === eventorganiser_is_event_template( '', 'event' ) ) {
-		remove_filter( 'the_content', '_eventorganiser_single_event_content' );
+	if( is_singular( 'event' ) && false === eventorganiser_is_event_template( '', 'event' ) ) {
+		add_action( 'get_header', function() {
+			remove_filter( 'the_content', '_eventorganiser_single_event_content' );
+		}, 0 );
+
 		add_filter( 'the_content', 'bpeo_canonical_event_content', 999 );
 	}
 
