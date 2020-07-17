@@ -180,7 +180,16 @@ function bpeo_the_filter_title() {
 		} elseif ( ! empty( $tag ) ) {
 			return sprintf( __( "Filtered by tag '%s'", 'bp-event-organiser' ), $tag );
 		} else {
-			return '';
+			/**
+			 * Allow developers to set a filter title when blank.
+			 *
+			 * @since 1.1.0
+			 *
+			 * @param string $title.
+			 */
+			$title = apply_filters( 'bpeo_get_the_filter_title', '' );
+
+			return esc_html( $title );
 		}
 	}
 
@@ -771,7 +780,6 @@ function bpeo_get_item_calendar_color( $item_id, $item_type ) {
 			break;
 
 		case 'author' :
-		default :
 			$color = bp_get_user_meta( $item_id, 'bpeo_calendar_color', true );
 			break;
 	}
@@ -812,7 +820,6 @@ function bpeo_get_item_calendar_color( $item_id, $item_type ) {
 				break;
 
 			case 'author' :
-			default :
 				bp_update_user_meta( $item_id, 'bpeo_calendar_color', $color );
 				break;
 		}
@@ -877,3 +884,66 @@ function bpeo_filter_ajax_query_attachments( $retval ) {
 	return $retval;
 }
 add_filter( 'ajax_query_attachments_args', 'bpeo_filter_ajax_query_attachments' );
+
+
+/** Import ICS ***************************************************************/
+
+/**
+ * Can an imported event be assigned to a different user?
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_assign_organiser_enabled() {
+	/**
+	 * Filter to toggle if a different user can be assigned to an imported event.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: false
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_assign_organiser', false );
+
+	return $retval;
+}
+
+/**
+ * See if categories can be imported from an ICS file.
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_categories_enabled() {
+	/**
+	 * Filter to toggle if categories can be imported from an ICS file.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: true
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_categories', true );
+
+	return $retval;
+}
+
+/**
+ * See if venues can be imported from an ICS file.
+ *
+ * @since 1.1.0
+ *
+ * @return bool
+ */
+function bpeo_is_import_venues_enabled() {
+	/**
+	 * Filter to toggle if venues can be imported from an ICS file.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param bool $retval Default: true
+	 */
+	$retval = apply_filters( 'bpeo_enable_import_venues', true );
+
+	return $retval;
+}

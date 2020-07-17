@@ -93,8 +93,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'enable_create_step' => false,
 			);
 
-			// Only register the "Manage > Events" screen for non-public groups.
-			if ( bp_is_group() && 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			// Register the "Manage > Events" screen.
+			if ( bp_is_group() ) {
 				$args['screens'] = array(
 					'edit' => array(
 						'enabled' => true,
@@ -124,6 +124,11 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 		}
 
 		$this->register_subnav();
+
+		// Import ICS
+		if ( class_exists( 'Event_Organiser_Im_Export' ) ) {
+			add_action( 'bp_actions', array( $this, 'manage_events_import_ics' ), 7 );
+		}
 	}
 
 	/**
@@ -169,19 +174,15 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'link'            => bpeo_get_group_permalink() . 'upcoming/',
 		), $default_params );
 
-		// Show 'Manage' tab if group is not public
-		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
-			// We only allow group admins to see this tab
-			$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
-
-			$sub_nav[] = array_merge( array(
-				'name'            => __( 'Manage', 'bp-event-organiser' ),
-				'slug'            => 'manage',
-				'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
-				'position'        => 0,
-				'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
-			), $default_params );
-		}
+		// We only allow group admins to see the Manage tab
+		$admin_ids = bp_group_admin_ids( groups_get_current_group(), 'array' );
+		$sub_nav[] = array_merge( array(
+			'name'            => __( 'Manage', 'bp-event-organiser' ),
+			'slug'            => 'manage',
+			'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
+			'position'        => 0,
+			'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
+		), $default_params );
 
 		// @todo This should probably use a custom cap instead of membership check.
 		$sub_nav[] = array_merge( array(
@@ -599,7 +600,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 * @param int $group_id ID of the group.
 	 */
 	public function edit_screen_callback( $group_id = null ) {
-
+		// Non-private groups get a "Manage iCalendar settings" section.
 		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
 			// use our template stack
 			add_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
@@ -609,6 +610,16 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 			// remove our template stack
 			remove_filter( 'eventorganiser_template_stack', 'bpeo_register_template_stack' );
+
+		/*
+		 * Public group, so add dummy submit button.
+		 *
+		 * The BP Group Extension API adds a submit button by default if one doesn't
+		 * exist. We don't need a submit button because the Import ICS section uses
+		 * a custom form. So to bypass this, we add a hidden submit button.
+		 */
+		} else {
+			echo '<input type="submit" style="display:none" />';
 		}
 	}
 
@@ -620,9 +631,220 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	public function edit_screen_save_callback( $group_id = null ) {
 	}
 
+	/**
+	 * Import iCalendar ICS section on "Manage > Events" screen.
+	 *
+	 * We're running this on 'bp_actions' at priority 7 so we can do our own
+	 * validation routine ahead of the BP Group Extension API. The reason we need
+	 * to do this is we run a custom <form> and the Group Extension API already
+	 * includes a <form> for us, so we can't do our thing with the native API.
+	 *
+	 * @since 1.1.0
+	 */
+	public function manage_events_import_ics() {
+		// If not on our "Manage > Events" page, bail.
+		if ( ! is_user_logged_in() || true !== ( bp_is_groups_component() && bp_is_current_action( 'admin' ) && bp_is_action_variable( $this->params['slug'], 0 ) ) ) {
+			return;
+		}
+
+		/*
+		 * Upload validation routine.
+		 *
+		 * This part is mostly a dupe of Event_Organiser_Im_Export::__construct() with
+		 * some mods to handle BP groups and notice rendering.
+		 */
+		if ( ! empty( $_POST['eventorganiser_import_events'] ) && wp_verify_nonce( $_POST['bpeo_group_import_nonce'], 'eventorganiser_import_events' ) ) {
+			global $EO_Errors;
+			$EO_Errors = new WP_Error();
+
+			// Perform checks on file.
+			if ( in_array( $_FILES["ics"]["type"], array( "text/calendar", "application/octet-stream" ) ) && ( $_FILES["ics"]["size"] < 2097152 ) ) {
+				if ( $_FILES["ics"]["error"] > 0 ) {
+					$EO_Errors = new WP_Error( 'eo_error', sprintf( __( "File Error encountered: %d", 'bp-event-organiser' ), $_FILES["ics"]["error"] ) );
+
+				// Import file.
+				} else {
+					// Add some meta to imported event.
+					add_action( 'eventorganiser_created_event', array( $this, 'add_meta_to_imported_event' ) );
+
+					// Bypass permission checks for event creation.
+					add_filter( 'map_meta_cap', array( $this, 'bypass_permission_checks' ), 10, 4 );
+
+					// Prevent activity items from being generated.
+					add_action( 'bp_activity_before_save', array( $this, 'block_activity_saving' ), 0 );
+
+					// Import the iCalendar file.
+					$import = Event_Organiser_Im_Export::get_object();
+					$import->import_file( $_FILES['ics']['tmp_name'] );
+
+					remove_filter( 'map_meta_cap',            array( $this, 'bypass_permission_checks' ), 10 );
+					remove_action( 'bp_activity_before_save', array( $this, 'block_activity_saving' ), 0 );
+				}
+
+			} elseif ( ! isset( $_FILES ) || empty( $_FILES['ics']['name'] ) ) {
+				$EO_Errors = new WP_Error( 'eo_error', __( "No file detected.", 'bp-event-organiser' ) );
+
+			} else {
+				$EO_Errors = new WP_Error( 'eo_error', __( "Invalid file uploaded. The file must be a ics calendar file of type 'text/calendar', no larger than 2MB.", 'bp-event-organiser' ) );
+				$size = size_format( $_FILES["ics"]["size"], 2 );
+				$details = sprintf( __( 'File size: %s. File type: %s', 'bp-event-organiser' ), $size, $_FILES["ics"]["type"] );
+				$EO_Errors->add( 'eo_error', $details );
+			}
+
+			$errors  = $EO_Errors->get_error_messages( 'eo_error' );
+			$notices = $EO_Errors->get_error_messages( 'eo_notice' );
+
+			if ( ! empty( $errors ) ) {
+				bp_core_add_message( sprintf( '<p>%s</p>', implode( '</p><p>', $errors ) ), 'error' );
+			} elseif ( ! empty( $notices ) ) {
+				bp_core_add_message( sprintf( '<p>%s</p>', implode( '</p><p>', $notices ) ) );
+			}
+
+			bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] . '/' );
+		}
+
+		// Check for validation message and remove some filters.
+		if ( isset( buddypress()->template_message ) ) {
+			remove_filter( 'bp_core_render_message_content', 'wp_kses_data', 5 );
+		}
+
+		// Load display hook.
+		add_action( 'bp_after_group_body', array( $this, 'manage_events_display_import_ics' ), 20 );
+	}
+
+	/**
+	 * Display hook for import iCalendar ICS section on "Manage > Events" screen.
+	 *
+	 * Mostly duplicated from Event_Organiser_Im_Export::get_im_export_markup().
+	 *
+	 * @since 1.1.0
+	 */
+	public function manage_events_display_import_ics() {
+	?>
+
+		<div class="manage-icalendar manage-icalendar-ics">
+			<h3><?php esc_html_e( 'Import Events from iCalendar File', 'bp-event-organiser' ); ?></h3>
+
+			<form method="post" action="" enctype="multipart/form-data">
+				<p><?php esc_html_e( "Select an iCalendar file that you would like to import into the group's calendar. The file should be an .ics file.", 'bp-event-organiser' ); ?></p>
+
+				<?php if ( taxonomy_exists( 'event-venue' ) && bpeo_is_import_venues_enabled() ) : ?>
+					<label><input type="checkbox" name="eo_import_venue" value="1" /> <?php _e( 'Import and create venues if they do not exist', 'bp-event-organiser' ); ?></label>
+
+				<?php endif; ?>
+
+				<?php if ( bpeo_is_import_categories_enabled() ) : ?>
+					<label><input type="checkbox" name="eo_import_cat" value="1" /> <?php _e( 'Import and create event categories if they do not exist', 'bp-event-organiser' ); ?></label>
+
+				<?php endif; ?>
+
+				<p><input type="file" name="ics" accept=".ics" /></p>
+
+				<?php wp_nonce_field( 'eventorganiser_import_events', 'bpeo_group_import_nonce' ); ?>
+
+				<?php bp_button( array(
+					'id' => 'bpeo-group-import-events',
+					'component' => 'groups',
+					'block_self' => false,
+					'button_element' => 'input',
+					'button_attr' => array(
+						'type'  => 'submit',
+						'name'  => 'eventorganiser_import_events',
+						'id'    => 'eventorganiser_import_events',
+						'class' => 'button',
+						'value' => esc_attr( 'Import', 'bp-event-organiser' )
+					),
+				) ); ?>
+			</form>
+
+		</div>
+
+	<?php
+	}
+
+	/**
+	 * Callback to connect an imported event via ICS to a group.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param int $post_id Event post ID.
+	 */
+	public function add_meta_to_imported_event( $post_id ) {
+		// Connect the event to the group.
+		bpeo_connect_event_to_group( $post_id, bp_get_current_group_id() );
+
+		// Save the filename into event meta, just in case.
+		update_post_meta( $post_id, '_eventorganiser_import_filename', $_FILES['ics']['name'] );
+
+		// Ensure events imported in a private group are private.
+		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			wp_update_post( array(
+				'ID'          => $post_id,
+				'post_status' => 'private'
+			) );
+		}
+	}
+
+	/**
+	 * Block activity items from being created.
+	 *
+	 * To block activity items, we wipe out the activity's component property.
+	 * BuddyPress will then prevent the item from being created.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param object $activity Activity item before being saved.
+	 */
+	public function block_activity_saving( $activity ) {
+		$activity->component = false;
+	}
+
+	/**
+	 * Bypass various capability checks during ICS event importing.
+	 *
+	 * Group administrators might not have the proper capabilities to create new
+	 * events during ICS imports, so let's bypass them.
+	 *
+	 * Hooked to 'map_meta_cap'.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param array  $caps    Capability array.
+	 * @param string $cap     Capability to check.
+	 * @param int    $user_id ID of the user being checked.
+	 * @param array  $args    Miscellaneous args.
+	 * @return array Caps whitelist.
+	 */
+	public function bypass_permission_checks( $caps, $cap, $user_id, $args ) {
+		if ( ! is_user_logged_in() ) {
+			return $caps;
+		}
+
+		switch ( $cap ) {
+			case 'manage_options':
+			case 'edit_events' :
+			case 'manage_venues' :
+				return array( 'exist' );
+				break;
+		}
+
+		return $caps;
+	}
+
 } // class ends
 
 
 
 // register our class
 bp_register_group_extension( 'BP_Event_Organiser_Group_Extension' );
+
+// Load our group iCal sync module if necessary.
+add_action( 'bp_init', function() {
+	if ( ! class_exists( 'EO_Sync_Ical' ) || ! bp_is_root_blog() ) {
+		return;
+	}
+
+	require_once BPEO_PATH . 'includes/class.bpeo_group_ical_sync.php';
+
+	$GLOBALS['buddypress_event_organiser']->group_ical_sync = new BPEO_Group_Ical_Sync;
+}, 0 );
