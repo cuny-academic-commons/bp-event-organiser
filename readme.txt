@@ -2,7 +2,7 @@
 Contributors: cuny-academic-commons, r-a-y, boonebgorges, needle
 Tags: buddypress, event, organiser, groups
 Requires at least: 3.6
-Tested up to: 5.0.3
+Tested up to: 5.4.2
 Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -23,10 +23,13 @@ Key features:
 == Changelog ==
 
 = 1.2.0 =
+* For group administrators, add ability to import events from an uploaded ICS file
+* For group administrators, add ability to import events from an iCalendar URL (requires Event Organiser iCal Sync premium extension)
 * Allow private group iCalendar files to be publicly-accessible
 * Better filterability of event content strings.
 * Usability improvements for Subscribe link.
 * Fix bug that could cause routing error for certain iCal slugs
+* Fix bug on canonical event pages where event meta information could be displayed twice
 
 == Installation ==
 
