@@ -1,7 +1,7 @@
 === BuddyPress Event Organiser ===
 Contributors: cuny-academic-commons, r-a-y, boonebgorges, needle
 Tags: buddypress, event, organiser, groups
-Requires at least: 3.6
+Requires at least: 3.8.0
 Tested up to: 5.4.2
 Stable tag: 1.2.0
 License: GPLv2 or later
