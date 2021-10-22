@@ -8,6 +8,10 @@ if ( file_exists( BP_TESTS_DIR . '/bootstrap.php' ) ) :
 
 	require_once getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit/includes/functions.php';
 
+	/*
+	 * Requires installing the dev version of EO at:
+	 * https://github.com/stephenharris/Event-Organiser
+	 */
 	$eo_dir = dirname( __FILE__ ) . '/../../../event-organiser/tests';
 
 	function _bootstrap_bp() {
