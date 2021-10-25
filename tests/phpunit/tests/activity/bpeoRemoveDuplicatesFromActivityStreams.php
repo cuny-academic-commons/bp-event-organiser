@@ -99,6 +99,8 @@ class BPEO_Tests_Activity_BpeoRemoveDuplicatesFromActivityStream extends BPEO_Un
 		}
 
 		self::commit_transaction();
+
+		unset( $GLOBALS['_bpeo_recursing_activity'] );
 	}
 
 	public static function connect_events_to_group_0( $e ) {

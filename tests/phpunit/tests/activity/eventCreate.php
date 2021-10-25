@@ -44,11 +44,13 @@ class BPEO_Tests_Activity_EventCreate extends BPEO_UnitTestCase {
 		$a = bpeo_get_activity_by_event_id( $e );
 		$this->assertNotEmpty( $a );
 
-		// User item.
+		// Group item.
 		$this->assertEquals( $u, $a[0]->user_id );
-		$this->assertEquals( 'events', $a[0]->component );
+		$this->assertEquals( 'groups', $a[0]->component );
 		$this->assertEquals( 'bpeo_create_event', $a[0]->type );
+		$this->assertEquals( $this->groups[2], $a[0]->item_id );
 		$this->assertEquals( $e, $a[0]->secondary_item_id );
+		$this->assertEquals( 1, $a[0]->hide_sitewide );
 
 		// Group item.
 		$this->assertEquals( $u, $a[1]->user_id );
@@ -58,13 +60,11 @@ class BPEO_Tests_Activity_EventCreate extends BPEO_UnitTestCase {
 		$this->assertEquals( $e, $a[1]->secondary_item_id );
 		$this->assertEquals( 1, $a[1]->hide_sitewide );
 
-		// Group item.
+		// User item.
 		$this->assertEquals( $u, $a[2]->user_id );
-		$this->assertEquals( 'groups', $a[2]->component );
+		$this->assertEquals( 'events', $a[2]->component );
 		$this->assertEquals( 'bpeo_create_event', $a[2]->type );
-		$this->assertEquals( $this->groups[2], $a[2]->item_id );
 		$this->assertEquals( $e, $a[2]->secondary_item_id );
-		$this->assertEquals( 1, $a[2]->hide_sitewide );
 	}
 
 	public function test_action_string_for_new_event_not_connected_to_groups() {

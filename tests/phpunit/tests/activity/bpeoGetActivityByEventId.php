@@ -77,6 +77,6 @@ class BPEO_Tests_Activity_BpeoGetActivityByEventId extends BPEO_UnitTestCase {
 
 		$found = bpeo_get_activity_by_event_id( 12345 );
 
-		$this->assertEquals( array( $a1, $a2 ), wp_list_pluck( $found, 'id' ) );
+		$this->assertEquals( array( $a2, $a1 ), wp_list_pluck( $found, 'id' ) );
 	}
 }

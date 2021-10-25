@@ -88,14 +88,14 @@ class BPEO_Tests_Activity_EventEdit extends BPEO_UnitTestCase {
 		$this->assertEquals( $u, $a[0]->user_id );
 		$this->assertEquals( 'groups', $a[0]->component );
 		$this->assertEquals( 'bpeo_edit_event', $a[0]->type );
-		$this->assertEquals( $this->groups[0], $a[0]->item_id );
+		$this->assertEquals( $this->groups[2], $a[0]->item_id );
 		$this->assertEquals( $e, $a[0]->secondary_item_id );
 
 		$this->assertNotEmpty( $a );
 		$this->assertEquals( $u, $a[1]->user_id );
 		$this->assertEquals( 'groups', $a[1]->component );
 		$this->assertEquals( 'bpeo_edit_event', $a[1]->type );
-		$this->assertEquals( $this->groups[2], $a[1]->item_id );
+		$this->assertEquals( $this->groups[0], $a[1]->item_id );
 		$this->assertEquals( $e, $a[1]->secondary_item_id );
 	}
 
