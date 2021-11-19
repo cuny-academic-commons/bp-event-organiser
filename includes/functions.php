@@ -385,7 +385,19 @@ function bpeo_the_single_event_action_links( $post = 0 ) {
 
 		// @todo make 'delete' slug changeable
 		if ( current_user_can( 'delete_event', $post->ID ) ) {
+			wp_enqueue_script( 'bp-confirm' );
+
 			$links['delete'] = '<a class="confirm" href="' . esc_url( $root ) . $post->post_name . '/delete/' . wp_create_nonce( "bpeo_delete_event_{$post->ID}" ). '/">' . __( 'Delete', 'bp-events-organiser' ). '</a>';
+
+			/*
+			 * bp-confirm JS requires a wrapper element with 'buddypress' as the ID.
+			 *
+			 * Add wrapper element if on a non-BuddyPress page or if theme doesn't support
+			 * BP theme compatibility.
+			 */
+			if ( ! is_buddypress() || ! bp_detect_theme_compat_with_current_theme() ) {
+				$links['delete'] = '<span id="buddypress">' . $links['delete'] . '</div>';
+			}
 		}
 
 		return implode( ' | ', (array) apply_filters( 'bpeo_get_the_single_event_action_links', $links ) );
