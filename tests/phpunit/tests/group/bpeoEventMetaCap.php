@@ -81,7 +81,7 @@ class BPEO_Tests_Group_BpeoEventMetaCap extends BPEO_UnitTestCase {
 
 		$e = $this->event_factory->event->create( array(
 			'post_author' => $this->user,
-			'post_status' => 'public',
+			'post_status' => 'publish',
 		) );
 
 		$g = $this->factory->group->create();
@@ -90,7 +90,7 @@ class BPEO_Tests_Group_BpeoEventMetaCap extends BPEO_UnitTestCase {
 		$this->set_current_user( $this->user );
 		$this->add_user_to_group( $this->user, $g );
 
-		$this->assertTrue( current_user_can( 'edit_event', $e ) );
+		$this->assertTrue( current_user_can( 'edit_event', $e, [ 'group_id' => $g ] ) );
 	}
 
 	public function test_loggedin_group_member_cannot_edit_another_group_event() {
@@ -99,17 +99,40 @@ class BPEO_Tests_Group_BpeoEventMetaCap extends BPEO_UnitTestCase {
 
 		$e = $this->event_factory->event->create( array(
 			'post_author' => $u,
-			'post_status' => 'public',
+			'post_status' => 'publish',
 		) );
 
-		$g = $this->factory->group->create();
+		$g = $this->factory->group->create( [
+			'creator_id' => $u
+		] );
+
+		$this->add_user_to_group( $this->user, $g );
 		bpeo_connect_event_to_group( $e, $g );
 
 		$this->set_current_user( $this->user );
-		$this->add_user_to_group( $this->user, $g );
-		$this->add_user_to_group( $u, $g );
 
-		$this->assertFalse( current_user_can( 'edit_event', $e ) );
+		$this->assertFalse( current_user_can( 'edit_event', $e, [ 'group_id' => $g ] ) );
+	}
+
+	public function test_loggedin_group_admin_can_edit_another_group_event() {
+		$this->user = $this->factory->user->create();
+		$u = $this->factory->user->create();
+
+		$e = $this->event_factory->event->create( array(
+			'post_author' => $u,
+			'post_status' => 'publish',
+		) );
+
+		$g = $this->factory->group->create( [
+			'creator_id' => $this->user
+		] );
+
+		$this->add_user_to_group( $u, $g );
+		bpeo_connect_event_to_group( $e, $g );
+
+		$this->set_current_user( $this->user );
+
+		$this->assertTrue( current_user_can( 'edit_event', $e, [ 'group_id' => $g ] ) );
 	}
 
 	public function test_loggedin_group_member_can_delete_own_event() {

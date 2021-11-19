@@ -289,7 +289,7 @@ function bpeo_group_event_meta_cap( $caps, $cap, $user_id, $args ) {
 	}
 
 	// Some caps do not expect a specific event to be passed to the filter.
-	$primitive_caps = array( 'read_events', 'read_group_events', 'read_private_events', 'edit_events', 'edit_others_events', 'publish_events', 'delete_events', 'delete_others_events', 'manage_event_categories' );
+	$primitive_caps = array( 'read_events', 'read_group_events', 'read_private_events', 'edit_events', 'publish_events', 'delete_events', 'delete_others_events', 'manage_event_categories' );
 	if ( ! in_array( $cap, $primitive_caps ) ) {
 		$event = get_post( $args[0] );
 		if ( 'event' !== $event->post_type ) {
@@ -374,8 +374,60 @@ function bpeo_group_event_meta_cap( $caps, $cap, $user_id, $args ) {
 				$caps = array( 'read' );
 			}
 
-		// @todo group admins / mods permissions
+			break;
+
 		case 'edit_event' :
+		case 'delete_event' :
+			// we've already parsed this logic in bpeo_map_basic_meta_caps()
+			if ( 'exist' === $caps[0] || is_super_admin() ) {
+				return $caps;
+			}
+
+			// Grab the group.
+			$group = groups_get_current_group();
+
+			if ( $group ) {
+				$admins = wp_list_pluck( $group->admins, 'user_id' );
+				$mods   = wp_list_pluck( $group->mods, 'user_id' );
+
+			// If 'group_id' is passed as an array parameter, use it.
+			} elseif ( ! empty( $args[1] ) && ! empty( $args[1]['group_id'] ) ) {
+				$group = groups_get_group( array( 'group_id' => $args[1]['group_id'], 'populate_extras' => false ) );
+				if ( ! $group ) {
+					return $caps;
+				}
+
+				$admins = wp_list_pluck( groups_get_group_admins( $group->id ), 'user_id' );
+				$mods   = wp_list_pluck( groups_get_group_mods( $group->id ), 'user_id' );
+
+			} else {
+				return $caps;
+			}
+
+			// Check if event is part of the group.
+			if ( ! in_array( $group->id, $event_groups ) ) {
+				return $caps;
+			}
+
+			// If user is an admin or mod, allow user to edit this event.
+			if ( in_array( $user_id, array_merge_recursive( $admins, $mods ) ) ) {
+				$caps = array( 'exist' );
+
+				// Pass 'edit_others_events' check in _wp_translate_postdata() when editing.
+				if ( 'edit_event' === $cap ) {
+					add_filter( 'user_has_cap', function( $allcaps, $primitive_caps, $r ) {
+						if ( 'edit_others_events' !== $r[0] ) {
+							return $allcaps;
+						}
+	
+						remove_filter( 'user_has_cap', __FUNCTION__ );
+	
+						$allcaps[ 'edit_others_events' ] = true;
+						return $allcaps;
+					}, 10, 3 );
+				}
+			}
+
 			break;
 	}
 
