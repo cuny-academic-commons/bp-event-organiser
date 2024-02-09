@@ -183,7 +183,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			'slug'            => 'manage',
 			'user_has_access' => in_array( bp_loggedin_user_id(), $admin_ids ),
 			'position'        => 0,
-			'link'            => trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] ),
+			'link'            => trailingslashit( bp_get_group_manage_url( groups_get_current_group() ) . $this->params['slug'] ),
 		), $default_params );
 
 		// @todo This should probably use a custom cap instead of membership check.

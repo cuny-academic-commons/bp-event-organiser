@@ -45,10 +45,12 @@ class BPEO_Component extends BP_Component {
 			'default_subnav_slug' => 'calendar',
 		);
 
+		$parent_url = bp_members_get_user_url( bp_displayed_user_id(), bp_members_get_path_chunks( [ $this->slug ] ) );
+
 		$sub_nav[] = array(
 			'name' => __( 'Calendar', 'bp-event-organiser' ),
 			'slug' => 'calendar', // @todo better l10n
-			'parent_url' => bp_displayed_user_domain() . trailingslashit( $this->slug ),
+			'parent_url' => $parent_url,
 			'parent_slug' => $this->slug,
 			'user_has_access' => bp_core_can_edit_settings(),
 			'screen_function' => array( $this, 'template_loader' ),
@@ -57,7 +59,7 @@ class BPEO_Component extends BP_Component {
 		$sub_nav[] = array(
 			'name' => __( 'Upcoming', 'bp-event-organiser' ),
 			'slug' => 'upcoming', // @todo better l10n
-			'parent_url' => bp_displayed_user_domain() . trailingslashit( $this->slug ),
+			'parent_url' => $parent_url,
 			'parent_slug' => $this->slug,
 			'user_has_access' => bp_core_can_edit_settings(),
 			'screen_function' => array( $this, 'template_loader' ),
@@ -66,7 +68,7 @@ class BPEO_Component extends BP_Component {
 		$sub_nav[] = array(
 			'name' => __( 'Manage', 'bp-event-organiser' ),
 			'slug' => 'manage',
-			'parent_url' => bp_displayed_user_domain() . trailingslashit( $this->slug ),
+			'parent_url' => $parent_url,
 			'parent_slug' => $this->slug,
 			'user_has_access' => bp_core_can_edit_settings() && current_user_can( 'publish_events' ),
 			'screen_function' => array( $this, 'template_loader' ),
@@ -75,7 +77,7 @@ class BPEO_Component extends BP_Component {
 		$sub_nav[] = array(
 			'name' => __( 'New Event', 'bp-event-organiser' ),
 			'slug' => bpeo_get_events_new_slug(),
-			'parent_url' => bp_displayed_user_domain() . trailingslashit( $this->slug ),
+			'parent_url' => $parent_url,
 			'parent_slug' => $this->slug,
 			'user_has_access' => bp_core_can_edit_settings() && current_user_can( 'publish_events' ),
 			'screen_function' => array( $this, 'template_loader' ),
@@ -95,26 +97,28 @@ class BPEO_Component extends BP_Component {
 			return;
 		}
 
+		$href = bp_members_get_user_url( bp_loggedin_user_id(), bp_members_get_path_chunks( [ $this->slug ] ) );
+
 		// Add the "My Account" sub menus
 		$wp_admin_nav[] = array(
 			'parent' => $bp->my_account_menu_id,
 			'id'     => 'my-account-events',
 			'title'  => __( 'Events', 'bp-event-organiser' ),
-			'href'   => bp_loggedin_user_domain() . bpeo_get_events_slug(),
+			'href'   => $href,
 		);
 
 		$wp_admin_nav[] = array(
 			'parent' => 'my-account-events',
 			'id'     => 'my-account-events-calendar',
 			'title'  => __( 'Calendar', 'bp-event-organiser' ),
-			'href'   => trailingslashit( bp_loggedin_user_domain() . bpeo_get_events_slug() ),
+			'href'   => $href,
 		);
 
 		$wp_admin_nav[] = array(
 			'parent' => 'my-account-events',
 			'id'     => 'my-account-events-new',
 			'title'  => __( 'New Event', 'bp-event-organiser' ),
-			'href'   => trailingslashit( bp_loggedin_user_domain() . bpeo_get_events_slug() . '/' . bpeo_get_events_new_slug() ),
+			'href'   => bp_members_get_user_url( bp_loggedin_user_id(), bp_members_get_path_chunks( [ $this->slug, bpeo_get_events_new_slug() ] ) ),
 		);
 
 		parent::setup_admin_bar( $wp_admin_nav );

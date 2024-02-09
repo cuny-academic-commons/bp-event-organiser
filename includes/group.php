@@ -648,7 +648,9 @@ function bpeo_get_group_permalink( $group = 0 ) {
 		) );
 	}
 
-	return trailingslashit( bp_get_group_permalink( $group ) . bpeo_get_events_slug() );
+	return bp_get_group_url( $group, [
+		'single_item_action' => bpeo_get_events_slug()
+	] );
 }
 
 /**
