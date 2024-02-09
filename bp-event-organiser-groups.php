@@ -93,18 +93,15 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				'enable_create_step' => false,
 			);
 
-			// Register the "Manage > Events" screen.
-			if ( bp_is_group() ) {
-				$args['screens'] = array(
-					'edit' => array(
-						'enabled' => true,
-						'slug' => 'events',
-						'name' => __( 'Events', 'bp-event-organiser' ),
-						'screen_callback' => array( $this, 'edit_screen_callback' ),
-						'screen_save_callback' => array( $this, 'edit_screen_save_callback' ),
-					),
-				);
-			}
+			$args['screens'] = array(
+				'edit' => array(
+					'enabled' => true,
+					'slug' => 'events',
+					'name' => __( 'Events', 'bp-event-organiser' ),
+					'screen_callback' => array( $this, 'edit_screen_callback' ),
+					'screen_save_callback' => array( $this, 'edit_screen_save_callback' ),
+				),
+			);
 
 			// init
 			parent::init( $args );
@@ -123,7 +120,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		}
 
-		$this->register_subnav();
+		add_action( 'bp_setup_nav', array( $this, 'register_subnav' ) );
 
 		// Import ICS
 		if ( class_exists( 'Event_Organiser_Im_Export' ) ) {
@@ -141,7 +138,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	 * a group's "Manage" subnav is registered in bp-groups-loader.php for an idea
 	 * of what we're doing here.
 	 */
-	protected function register_subnav() {
+	public function register_subnav() {
 		if ( ! bp_is_group() ) {
 			return;
 		}
