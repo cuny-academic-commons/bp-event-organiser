@@ -234,7 +234,7 @@ function bpeo_add_group_info_to_calendar_event( $event, $event_id, $occurrence_i
 			$group = groups_get_group( array( 'group_id' => $group_id ) );
 			$event['groups'][ $group_id ] = array(
 				'name' => $group->name,
-				'url' => bp_get_group_permalink( $group ),
+				'url' => bp_get_group_url( $group ),
 				'id' => $group_id,
 				'color' => bpeo_get_item_calendar_color( $group_id, 'group' ),
 			);
@@ -534,7 +534,7 @@ function bpeo_activity_action_format_for_groups( $action, $activity ) {
 	}
 
 	$event = get_post( $activity->secondary_item_id );
-	$user_url = bp_core_get_user_domain( $activity->user_id );
+	$user_url = bp_members_get_user_url( $activity->user_id );
 	$user_name = bp_core_get_user_displayname( $activity->user_id );
 
 	// The URL should correspond to the current group, or the first group that the user is a member of.
@@ -590,7 +590,7 @@ function bpeo_activity_action_format_for_groups( $action, $activity ) {
 	foreach ( $groups as $group ) {
 		$group_links[] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( trailingslashit( bp_get_group_permalink( $group ) . bpeo_get_events_slug() ) ),
+			esc_url( trailingslashit( bpeo_get_group_permalink( $group ) ) ),
 			esc_html( $group->name )
 		);
 	}

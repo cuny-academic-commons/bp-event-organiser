@@ -222,7 +222,7 @@ function bpeo_activity_action_format( $action, $activity ) {
 		return $action;
 	}
 
-	$user_url = bp_core_get_user_domain( $activity->user_id );
+	$user_url = bp_members_get_user_url( $activity->user_id );
 	$user_name = bp_core_get_user_displayname( $activity->user_id );
 	$event_url = get_permalink( $event );
 	$event_name = $event->post_title;

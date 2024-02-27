@@ -266,11 +266,11 @@ function bpeo_group_events_shortcode( $r = array() ) {
 
 	// Group calendar
 	if ( 'calendar' === $r['type'] ) {
-		$link = bp_get_group_permalink( $group ) . 'events/?embedded=true';
+		$link = bp_get_group_url( $group ) . 'events/?embedded=true';
 
 	// Upcoming events
 	} else {
-		$link = bp_get_group_permalink( $group ) . 'events/upcoming/?embedded=true';
+		$link = bp_get_group_url( $group ) . 'events/upcoming/?embedded=true';
 	}
 
 	$height = ! empty( $r['height'] ) ? 'height="' . (int) $r['height'] . '"' : '';

@@ -142,7 +142,7 @@ function bpeo_the_user_private_ical_url( $user_id = 0 ) {
 			return false;
 		}
 
-		return trailingslashit( esc_url( bp_core_get_user_domain( $user_id ) . bpeo_get_events_slug() . '/' . bpeo_get_the_user_private_ical_hash( $user_id ) . '/ical' ) );
+		return trailingslashit( esc_url( bp_members_get_user_url( $user_id ) . bpeo_get_events_slug() . '/' . bpeo_get_the_user_private_ical_hash( $user_id ) . '/ical' ) );
 	}
 
 /**
@@ -297,7 +297,7 @@ function bpeo_calendar_filter_event_link_for_bp_user( $retval ) {
 	$post_slug = array_pop( $event_url );
 
 	// regenerate the post URL to account for group permalink
-	return trailingslashit( bp_displayed_user_domain() . bpeo_get_events_slug() . '/' . $post_slug );
+	return trailingslashit( bp_displayed_user_url() . bpeo_get_events_slug() . '/' . $post_slug );
 }
 add_filter( 'eventorganiser_calendar_event_link', 'bpeo_calendar_filter_event_link_for_bp_user' );
 
@@ -365,7 +365,7 @@ function bpeo_add_author_info_to_calendar_event( $event, $event_id, $occurrence_
 
 	$event['author'] = array(
 		'id' => $event_obj->post_author,
-		'url' => bp_core_get_user_domain( $event_obj->post_author ),
+		'url' => bp_members_get_user_url( $event_obj->post_author ),
 		'name' => bp_core_get_user_displayname( $event_obj->post_author ),
 		'color' => bpeo_get_item_calendar_color( $event_obj->post_author, 'author' ),
 	);

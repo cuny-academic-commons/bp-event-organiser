@@ -586,7 +586,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 			bpeo_get_the_group_private_ical_hash( bp_get_current_group_id(), true );
 
 			bp_core_add_message( __( 'Private iCalendar URL has been reset. Please copy the new link below to use in your calendar application.', 'bp-event-organiser' ) );
-			bp_core_redirect( trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->slug ) );
+			bp_core_redirect( bp_get_group_manage_url( groups_get_current_group(), [ 'single_item_action_variables' => $this->slug ] ) );
 			die();
 		}
 
@@ -700,7 +700,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 				bp_core_add_message( sprintf( '<p>%s</p>', implode( '</p><p>', $notices ) ) );
 			}
 
-			bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . $this->params['slug'] . '/' );
+			bp_core_redirect( bp_get_group_manage_url( groups_get_current_group(), [ 'single_item_action_variables' => $this->params['slug'] ] ) );
 		}
 
 		// Check for validation message and remove some filters.

@@ -16,7 +16,7 @@
 			'id' => 'group-reset-private-ical',
 			'component' => 'groups',
 			'block_self' => false,
-			'link_href' => wp_nonce_url( trailingslashit( bp_get_group_permalink( groups_get_current_group() ) . 'admin/' . bpeo_get_events_slug() ), 'bpeo_group_reset_private_ical', 'bpeo-reset' ),
+			'link_href' => wp_nonce_url( bp_get_group_manage_url( groups_get_current_group(), [ 'single_item_action_variables' => bpeo_get_events_slug() ] ), 'bpeo_group_reset_private_ical', 'bpeo-reset' ),
 			'link_class' => 'confirm',
 			'link_text' => __( 'Reset private URL', 'bp-event-organiser' ),
 			'link_title' => __( 'This will invalidate the existing private iCalendar link and generate a new link.', 'bp-event-organiser' )

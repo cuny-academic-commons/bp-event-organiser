@@ -39,12 +39,12 @@ class BPEO_Group_oEmbed_Extension extends BP_Core_oEmbed_Extension {
 	 */
 	protected function validate_url_to_item_id( $url ) {
 		// Check the URL to see if we're on a group page.
-		if ( 0 !== strpos( $url, bp_get_groups_directory_permalink() ) ) {
+		if ( 0 !== strpos( $url, bp_get_groups_directory_url() ) ) {
 			return false;
 		}
 
 		// Get URI path.
-		$path = untrailingslashit( str_replace( bp_get_groups_directory_permalink(), '', $url ) );
+		$path = untrailingslashit( str_replace( bp_get_groups_directory_url(), '', $url ) );
 		$path = explode( '/', $path );
 
 		// Not an event page, so bail!
