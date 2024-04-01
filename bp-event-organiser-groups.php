@@ -197,6 +197,24 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	}
 
 	/**
+	 * Get the default subnav slug.
+	 *
+	 * @return string
+	 */
+	protected function get_default_subnav_slug() {
+		/**
+		 * Filters the default subnav slug for BPEO.
+		 *
+		 * Defaults to 'calendar', but can also use 'upcoming'.
+		 *
+		 * @param string
+		 */
+		$default_subnav_slug = apply_filters( 'bpeo_default_subnav_slug', 'calendar' );
+
+		return $default_subnav_slug;
+	}
+
+	/**
 	 * Override parent _display_hook() method to add logic for single events.
 	 */
 	public function _display_hook() {
@@ -225,8 +243,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 			add_action( 'bp_template_content', array( $this->create_event, 'display' ) );
 
-		// upcoming
-		} elseif ( bp_is_action_variable( 'upcoming', 0 ) ) {
+		// upcoming or calendar
+		} elseif ( bp_is_action_variable( 'upcoming', 0 ) || bp_is_action_variable( 'calendar', 0 ) ) {
 			add_action( 'bp_template_content', array( $this, 'call_display' ) );
 
 		// iCal
@@ -256,9 +274,8 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 	public function add_subnav() {
 		$_action_variables = buddypress()->action_variables;
 
-		// highlight the 'calendar' slug when we're on the slug
 		if ( false === bp_action_variable() ) {
-			buddypress()->action_variables[] = 'calendar';
+			buddypress()->action_variables[] = $this->get_default_subnav_slug();
 		}
 
 		// Use our template stack.
@@ -299,7 +316,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 		$action = bp_action_variable( 0 );
 		if ( ! $action ) {
-			$action = 'calendar';
+			$action = $this->get_default_subnav_slug();
 		}
 
 		// load our template part
