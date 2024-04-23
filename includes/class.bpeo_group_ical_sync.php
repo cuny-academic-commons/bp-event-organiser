@@ -21,6 +21,7 @@ class BPEO_Group_Ical_Sync {
 		add_action( 'wp_ajax_fetch-eo-feed',  array( $this, 'ajax_mods' ), 0 );
 
 		// EO hooks to save our custom BP meta.
+		add_action( 'bp_init',                                 array( $this, 'register_ajax_actions' ) );
 		add_action( 'added_post_meta',                         array( $this, 'on_feed_creation' ), 10, 3 );
 		add_filter( 'eventorganiser_ical_sync_meta_key_map',   array( $this, 'disable_term_and_activity_saving' ) );
 		add_action( 'eventorganiser_ical_sync_event_updated',  array( $this, 'reenable_term_saving' ) );
@@ -248,6 +249,20 @@ class BPEO_Group_Ical_Sync {
 	}
 
 	/** SAVE HOOKS **********************************************************/
+
+	/**
+	 * Registers EO's add feed AJAX action.
+	 *
+	 * This is needed so we can still use BuddyPress page conditionals after
+	 * BuddyPress 12+ on certain AJAX hooks.
+	 */
+	public function register_ajax_actions() {
+		if ( ! function_exists( 'bp_ajax_register_action' ) ) {
+			return;
+		}
+
+		bp_ajax_register_action( 'add-eo-feed' );
+	}
 
 	/**
 	 * Do some things when an iCalendar feed is created.
