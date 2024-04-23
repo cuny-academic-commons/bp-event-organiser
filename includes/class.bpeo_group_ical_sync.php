@@ -340,6 +340,13 @@ class BPEO_Group_Ical_Sync {
 			return;
 		}
 
+		// Ensure our feed's events are marked as published or private.
+		$status = 'publish';
+		if ( 'public' !== bp_get_group_status( groups_get_current_group() ) ) {
+			$status = 'private';
+		}
+		$_POST['feed-status'] = $status;
+
 		// Bypass 'manage_options' capability so we can save our settings.
 		add_filter( 'map_meta_cap', array( $this, 'pass_manage_options_cap' ), 10, 4 );
 
