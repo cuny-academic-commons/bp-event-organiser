@@ -755,7 +755,7 @@ class BP_Event_Organiser_Group_Extension extends BP_Group_Extension {
 
 				<?php endif; ?>
 
-				<p><input type="file" name="ics" accept=".ics" /></p>
+				<p><input type="file" name="ics" accept=".ics" aria-label="<?php _e( 'Select iCalendar file', 'bp-event-organiser' ); ?>" /></p>
 
 				<?php wp_nonce_field( 'eventorganiser_import_events', 'bpeo_group_import_nonce' ); ?>
 
