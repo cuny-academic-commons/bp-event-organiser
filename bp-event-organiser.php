@@ -85,6 +85,9 @@ class BuddyPress_Event_Organiser {
 	// Event Organiser utilities class
 	public $eo;
 
+	public $group_ical_sync;
+	public $group_oembed;
+
 
 
 	/**
