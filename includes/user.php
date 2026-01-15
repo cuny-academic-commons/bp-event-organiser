@@ -241,6 +241,18 @@ function bpeo_map_upload_files_meta_cap( $caps, $cap, $user_id ) {
 		return array( 'exist' );
 	}
 
+	// allow 'upload_files' cap via AJAX for our 'event' post type
+	$ajax_actions = [ 'upload-attachment', 'query-attachments' ];
+	if ( wp_doing_ajax() && isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], $ajax_actions ) &&
+		isset( $_REQUEST['post_id'] ) && 'event' === get_post_type( $_REQUEST['post_id'] ) ) {
+		// Sanity check: If uploading, verify 'media-form' nonce
+		if ( 'upload-attachment' === $_REQUEST['action'] && false === check_ajax_referer( 'media-form', false, false ) ) {
+			return $caps;
+		}
+
+		return array( 'exist' );
+	}
+
 	return $caps;
 }
 add_filter( 'map_meta_cap', 'bpeo_map_upload_files_meta_cap', 10, 3 );
