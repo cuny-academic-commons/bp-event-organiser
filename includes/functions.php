@@ -35,10 +35,10 @@ function bpeo_register_assets() {
 function bpeo_enqueue_assets() {
 	// Select2
 	if ( false === wp_script_is( 'select2' ) ) {
-		wp_enqueue_script( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js', array( 'jquery' ) );
+		wp_enqueue_script( 'select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js', array( 'jquery' ) );
 	}
 	if ( false === wp_style_is( 'select2' ) ) {
-		wp_enqueue_style( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css' );
+		wp_enqueue_style( 'select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css' );
 	}
 
 	wp_enqueue_script( 'bp_event_organiser_js', BUDDYPRESS_EVENT_ORGANISER_URL . 'assets/js/bp-event-organiser.js', array( 'jquery' ), BUDDYPRESS_EVENT_ORGANISER_VERSION, true );
