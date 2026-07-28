@@ -121,6 +121,22 @@ body.group-admin.events #bp-group-edit-events-submit-wrapper {
 	margin-top: 2em;
 }
 
+#bp_event_organiser_metabox .select2-selection__choice__remove {
+	line-height: inherit;
+}
+
+ul.ui-autocomplete.ui-menu .ui-menu-item-wrapper {
+	display: inline-block;
+	text-decoration: none;
+	width: 100%;
+}
+
+#ui-datepicker-div .ui-state-default.ui-state-active,
+ul.ui-autocomplete.ui-menu .ui-menu-item-wrapper.ui-state-active {
+	background: #2f7c9f;
+	color: #fff;
+}
+
 /* BuddyPress Companion Stylesheet overrides */
 #buddypress .eo-fullcalendar table {
 	margin: inherit;
