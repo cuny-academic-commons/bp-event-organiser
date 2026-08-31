@@ -91,6 +91,11 @@ jQuery(function($){
 		return markup;
 	}
 
+	// Select2 sets the tabindex for selection remove buttons to -1. Fix this.
+	const fixTabIndexButtons = (select) => {
+		select.next().find('.select2-selection__choice__remove').attr('tabindex', '0');
+	}
+
 	select2obj = bpeoSelect.select2({
 		ajax: {
 			method: 'POST',
@@ -141,6 +146,16 @@ jQuery(function($){
 	bpeoSelect.on( 'change', function() {
 		checkGroupOrganizer();
 	} );
+
+	// Fix tabindex on load for existing selections.
+	fixTabIndexButtons( bpeoSelect );
+
+	bpeoSelect.on('select2:select select2:unselect', function(e) {
+		// Ensure we set the tabindex after the callbacks above have finished.
+		queueMicrotask(() => {
+			fixTabIndexButtons( $(this) );
+		});
+	});
 
 	if ( select2obj ) {
 		var $silent_wrapper = $( '#bpeo-silent-wrapper' );
